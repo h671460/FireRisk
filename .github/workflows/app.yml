@@ -50,6 +50,7 @@ jobs:
     - name: Install uv dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
+        uv venv
         uv lock
         uv pip install .
 
