@@ -14,7 +14,7 @@ https://docs.astral.sh/uv/getting-started/installation/
 Create a virtual environment using uv:
 
 ```bash
-uv venv
+uv venv --python 3.12
 ```
 
 Activate the virtual environment:
