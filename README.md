@@ -40,7 +40,7 @@ source .venv/Scripts/activate
 uv pip install .
 ```
 
-### Run tests
+### Run Tests
 ```bash
 uv run pytest -vs
 ```
@@ -49,15 +49,16 @@ uv run pytest -vs
 
 Specify the license here (e.g., MIT, Apache 2.0). -->
 
-### Install Node JS
+## Frontend Setup
 
-```bash
-https://nodejs.org/en/download 
-```
+### Install Node.js
+Download and install Node.js from:
+https://nodejs.org/en/download
 
-### Start Frontend
+### Start the Frontend
 
 ```bash
 cd frontend
+npm install
 npm start
 ```
