@@ -43,3 +43,16 @@ uv pip install -r requirements.txt
 <!-- ## License
 
 Specify the license here (e.g., MIT, Apache 2.0). -->
+
+### Install Node JS
+
+```bash
+https://nodejs.org/en/download 
+```
+
+### Start Frontend
+
+```bash
+cd frontend
+npm start
+```
