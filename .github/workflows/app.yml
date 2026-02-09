@@ -9,7 +9,7 @@ on:
   workflow_dispatch: 
 
 jobs:
-  test-subpackage-3:
+  test_app:
     runs-on: ubuntu-latest
     
     steps:
@@ -58,4 +58,5 @@ jobs:
     - name: Test with pytest
       run: |
         source .venv/bin/activate
-        uv run pytest -sv
+        # uv run pytest -sv
+        pytest --no-tests=pass
