@@ -59,4 +59,4 @@ jobs:
       run: |
         source .venv/bin/activate
         # uv run pytest -sv
-        uv run pytest tests -vs
+        uv run pytest tests -v

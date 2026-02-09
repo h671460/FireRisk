@@ -37,7 +37,12 @@ source .venv/Scripts/activate
 ### Install Requirements
 
 ```bash
-uv pip install -r requirements.txt 
+uv pip install .
+```
+
+### Run tests
+```bash
+uv run pytest -vs
 ```
 
 <!-- ## License
