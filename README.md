@@ -14,7 +14,7 @@ https://docs.astral.sh/uv/getting-started/installation/
 Create a virtual environment using uv:
 
 ```bash
-uv venv
+uv venv --python 3.12
 ```
 
 Activate the virtual environment:
@@ -37,22 +37,28 @@ source .venv/Scripts/activate
 ### Install Requirements
 
 ```bash
-uv pip install -r requirements.txt 
+uv pip install .
+```
+
+### Run Tests
+```bash
+uv run pytest -vs
 ```
 
 <!-- ## License
 
 Specify the license here (e.g., MIT, Apache 2.0). -->
 
-### Install Node JS
+## Frontend Setup
 
-```bash
-https://nodejs.org/en/download 
-```
+### Install Node.js
+Download and install Node.js from:
+https://nodejs.org/en/download
 
-### Start Frontend
+### Start the Frontend
 
 ```bash
 cd frontend
+npm install
 npm start
 ```

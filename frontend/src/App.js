@@ -5,17 +5,19 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <h2>
+          Fire-Risk forecast.
+        </h2>
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          The main purpose of this website is to provide fire-risk forecasts for a user-defined location or city. Users can view the fire-risk forecast from the day of their search and for the following two weeks.
         </p>
         <a
           className="App-link"
-          href="https://reactjs.org"
+          href="https://github.com/h671460/FireRisk"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
+          Github repository
         </a>
       </header>
     </div>
