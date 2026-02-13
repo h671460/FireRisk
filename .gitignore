@@ -28,3 +28,7 @@ venv/
 env/
 ENV/
 .venv
+
+
+nrec.pem
+uzefull_commands.txt
