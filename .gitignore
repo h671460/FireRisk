@@ -32,3 +32,4 @@ ENV/
 
 nrec.pem
 uzefull_commands.txt
+.env*

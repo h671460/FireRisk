@@ -11,6 +11,49 @@ services:
       HOST: 0.0.0.0
     command: sh -lc "npm install && npm start"
 
+  postgres:    
+    image: postgres:16
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-postgres:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgrest"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  timescaledb: 
+    image: timescale/timescaledb:latest-pg16 
+    container_name: timescale-db
+    environment:
+      - POSTGRES_USER=${TIMESCALE_USER}
+      - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD}
+      - POSTGRES_DB=${TIMESCALE_DATABASE}
+    ports: 
+      - "5468:5432" 
+    volumes: 
+      - timescale_data:/var/lib/postgresql/data 
+      - ./init-timescaledb:/docker-entrypoint-initdb.d 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d timescaledb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      
+
+
+
+
+
+
 volumes:
   frontend_node_modules:
-  
+  postgres_data:
+  timescale_data:
