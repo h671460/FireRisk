@@ -10,6 +10,8 @@ services:
     environment:
       HOST: 0.0.0.0
     command: sh -lc "npm install && npm start"
+    restart: 
+      unless-stopped
 
   postgres:    
     image: postgres:16
@@ -24,10 +26,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-postgres:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgrest"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE}"]
       interval: 5s
       timeout: 3s
       retries: 10
+    restart: 
+      unless-stopped
 
   timescaledb: 
     image: timescale/timescaledb:latest-pg16 
@@ -37,16 +41,34 @@ services:
       - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD}
       - POSTGRES_DB=${TIMESCALE_DATABASE}
     ports: 
-      - "5468:5432" 
+      - "${TIMESCALE_PORT}:5432"
     volumes: 
       - timescale_data:/var/lib/postgresql/data 
       - ./init-timescaledb:/docker-entrypoint-initdb.d 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d timescaledb"]
+      test: ["CMD-SHELL", "pg_isready -U ${TIMESCALE_USER} -d ${TIMESCALE_DATABASE}"]
       interval: 5s
       timeout: 3s
       retries: 10
-      
+    restart: 
+      unless-stopped
+  
+
+  frcm-api:
+    build: .
+    container_name: frcm-api
+    ports:
+      - "4444:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    restart: 
+      unless-stopped
+    env_file:
+    - .env.postgres
+    - .env.timescale
 
 
 
@@ -57,3 +79,8 @@ volumes:
   frontend_node_modules:
   postgres_data:
   timescale_data:
+
+
+networks:
+  default:
+    driver: bridge

@@ -1,16 +1,15 @@
 #!/bin/bash
 
-source venv/scripts/activate
-
-export PYTHONPATH=$(pwd)
+# source .venv/source/activate
 
 set -a
 source .env.postgres
 set +a
-echo "env variables loaded from .env.postgres"
+
+echo "✅ env variables loaded from .env.postgres"
 
 
 set -a
 source .env.timescale
 set +a
-echo "env variables loaded from .env.timescale"
+echo "✅ env variables loaded from .env.timescale"
