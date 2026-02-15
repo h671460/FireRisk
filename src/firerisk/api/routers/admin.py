@@ -36,22 +36,23 @@ async def see_all_users(user: user_dependency, db: db_dependency):
     return db.query(Users).all()
 
 
-@router.delete("/users/{username}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user: user_dependency, 
-                      db: db_dependency,
-                      username: str = Path(..., description="The username of the user to delete"), ):
-    if user is None:
-        raise HTTPException(status_code=401, detail='Authentication Failed')
+# shoulldnt trust payload for sensetive operations like delete account
+# @router.delete("/users/{username}", status_code=status.HTTP_204_NO_CONTENT)
+# async def delete_user(user: user_dependency, 
+#                       db: db_dependency,
+#                       username: str = Path(..., description="The username of the user to delete"), ):
+#     if user is None:
+#         raise HTTPException(status_code=401, detail='Authentication Failed')
     
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail='Forbidden: Admins only')
+#     if user.get("role") != "admin":
+#         raise HTTPException(status_code=403, detail='Forbidden: Admins only')
     
-    user_to_delete = db.query(Users).filter(Users.username == username).first()
-    if user_to_delete is None:
-        raise HTTPException(status_code=404, detail='User not found')
+#     user_to_delete = db.query(Users).filter(Users.username == username).first()
+#     if user_to_delete is None:
+#         raise HTTPException(status_code=404, detail='User not found')
     
-    if user_to_delete.role == "admin":
-        raise HTTPException(status_code=403, detail='Forbidden: Cannot delete admin users')
+#     if user_to_delete.role == "admin":
+#         raise HTTPException(status_code=403, detail='Forbidden: Cannot delete admin users')
     
-    db.delete(user_to_delete)
-    db.commit()
+#     db.delete(user_to_delete)
+#     db.commit()

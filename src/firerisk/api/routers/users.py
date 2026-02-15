@@ -57,11 +57,12 @@ async def change_password(user: user_dependency, db: db_dependency,
 
 
 
-@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_account(user: user_dependency, db: db_dependency):
-    if user is None:
-        raise HTTPException(status_code=401, detail='Authentication Failed')
-    user_model = db.query(Users).filter(Users.id == user.get('id')).first()
-    db.delete(user_model)
-    db.commit()
+# shoulldnt trust payload for sensetive operations like delete account
+# @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+# async def delete_account(user: user_dependency, db: db_dependency):
+#     if user is None:
+#         raise HTTPException(status_code=401, detail='Authentication Failed')
+#     user_model = db.query(Users).filter(Users.id == user.get('id')).first()
+#     db.delete(user_model)
+#     db.commit()
     
