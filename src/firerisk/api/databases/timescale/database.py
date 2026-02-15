@@ -4,12 +4,12 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 try:
-    TIMESCALE_USER = os.getenv("TIMESCALE_USER")
-    TIMESCALE_PASSWORD = os.getenv("TIMESCALE_PASSWORD")
-    TIMESCALE_DB = os.getenv("TIMESCALE_DATABASE")
-    TIMESCALE_HOST = os.getenv("TIMESCALE_HOST") 
-    TIMESCALE_PORT = os.getenv("TIMESCALE_PORT")
-    TIMESCALE_SCHEMA = os.getenv("TIMESCALE_SCHEMA")
+    TIMESCALE_USER = os.getenv("TIMESCALE_USER", "postgres")
+    TIMESCALE_PASSWORD = os.getenv("TIMESCALE_PASSWORD", "postgrespass123")
+    TIMESCALE_DB = os.getenv("TIMESCALE_DATABASE", "timescale_db")
+    TIMESCALE_HOST = os.getenv("TIMESCALE_HOST", "timescale-db") 
+    TIMESCALE_PORT = os.getenv("TIMESCALE_PORT", "5432")
+    TIMESCALE_SCHEMA = os.getenv("TIMESCALE_SCHEMA", "public")
 except KeyError as e:
     raise KeyError(f"Environment variable {str(e)} is not set. Please set it before running the application.")
 
