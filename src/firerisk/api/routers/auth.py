@@ -79,8 +79,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)],db: db_
         username: str = payload.get('sub')
         user_id: int = payload.get('id')
         user_role: str = payload.get('role')
-        user_still_in_db = db.query(Users).filter(Users.id == user_id).first()
-        if username is None or user_id is None or user_still_in_db is None:
+        if username is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Could not validate user.')
         return {'username': username, 'id': user_id, 'role': user_role}
