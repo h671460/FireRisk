@@ -51,8 +51,7 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         uv venv
-        uv lock
-        uv pip install .
+        uv sync --locked
 
 
     - name: Test with pytest
