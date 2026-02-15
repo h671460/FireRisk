@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# source .venv/source/activate
+
 
 set -a
 source .env.postgres
