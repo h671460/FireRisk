@@ -64,3 +64,4 @@ async def delete_account(user: user_dependency, db: db_dependency):
     user_model = db.query(Users).filter(Users.id == user.get('id')).first()
     db.delete(user_model)
     db.commit()
+    
