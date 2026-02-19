@@ -3,8 +3,6 @@ from src.firerisk.api.main import app
 from fastapi import status
 
 
-import os
-
 client = TestClient(app)
 
 

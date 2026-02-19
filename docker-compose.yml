@@ -24,7 +24,6 @@ services:
       - "5467:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-postgres:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE}"]
       interval: 5s
@@ -32,6 +31,55 @@ services:
       retries: 10
     restart: 
       unless-stopped
+
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-db:5432/${POSTGRES_DATABASE}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+
+      KEYCLOAK_ADMIN: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: true
+
+
+
+      KC_HTTP_ENABLED: "true"
+
+    # volumes:
+    #   - ./keycloak-themes:/opt/keycloak/themes
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+
+  mailhog:
+    depends_on:
+      - keycloak
+    image: mailhog/mailhog
+    container_name: keycloak_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+
+
 
   timescaledb:
     image: timescale/timescaledb:latest-pg16 
@@ -54,23 +102,23 @@ services:
       unless-stopped
   
 
-  frcm-api:
-    build: .
-    container_name: frcm-api
-    ports:
-      - "9999:8000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      timescaledb:
-        condition: service_healthy
-    restart: 
-      unless-stopped
-    env_file:
-    - .env.postgres
-    - .env.timescale
-
-
+  # frcm-api:
+  #   build: .
+  #   container_name: frcm-api
+  #   ports:
+  #     - "9999:8000"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     keycloak:
+  #       condition: service_started
+  #     timescaledb:
+  #       condition: service_healthy
+  #   restart: 
+  #     unless-stopped
+  #   env_file:
+  #   - .env.timescale
+  #   - .env.keycloak
 
 
 
