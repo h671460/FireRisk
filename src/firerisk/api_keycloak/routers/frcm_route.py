@@ -34,7 +34,7 @@ DB = Annotated[Session, Depends(get_db)]
 @router.get("/", status_code=status.HTTP_200_OK)
 async def read_last_100(
     db: DB,
-    user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
+    user: userPayload = Depends(has_roles(["admin"])),
 ):
     if user is None:
         return {"error": "Unauthorized"}
