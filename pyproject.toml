@@ -26,7 +26,6 @@ dependencies = [
 ]
 
 [project.scripts]
-firerisk = "firerisk:main"
 firerisk-api = "firerisk.api_keycloak:main"
 
 [build-system]
