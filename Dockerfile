@@ -16,4 +16,4 @@ COPY . .
 RUN uv sync --locked
 
 # run FastAPI dev server
-CMD ["uv", "run", "fastapi", "dev", "src/firerisk/api/main.py", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "firerisk-api"]

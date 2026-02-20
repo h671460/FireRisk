@@ -2,7 +2,8 @@ from pydantic import BaseModel
 
 
 class authConfiguration(BaseModel):
-    server_url: str
+    keycloak_public_url: str
+    keycloak_internal_url: str
     realm: str
     client_id: str
     client_secret: str
@@ -12,7 +13,8 @@ class authConfiguration(BaseModel):
     
     def to_dict(self):
         return {
-            "server_url": self.server_url,
+            "keycloak_public_url": self.keycloak_public_url,
+            "keycloak_internal_url": self.keycloak_internal_url,
             "realm": self.realm,
             "client_id": self.client_id,
             "client_secret": self.client_secret,

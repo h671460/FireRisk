@@ -9,13 +9,15 @@ from pprint import pprint
 # oauth2_scheme = OAuth2PasswordBearer(
 #     tokenUrl=settings.token_url
 # )
+
+
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=f"{settings.server_url}realms/{settings.realm}/protocol/openid-connect/auth?prompt=login",#?prompt=login
-    tokenUrl=f"{settings.server_url}realms/{settings.realm}/protocol/openid-connect/token",
+    authorizationUrl=f"{settings.keycloak_public_url}realms/{settings.realm}/protocol/openid-connect/auth?prompt=login",#?prompt=login
+    tokenUrl=f"{settings.keycloak_public_url}realms/{settings.realm}/protocol/openid-connect/token",
 )
 
 keycloak_openid = KeycloakOpenID(
-    server_url=settings.server_url,
+    server_url=settings.keycloak_internal_url,
     client_id=settings.client_id,
     realm_name=settings.realm,
     client_secret_key=settings.client_secret,

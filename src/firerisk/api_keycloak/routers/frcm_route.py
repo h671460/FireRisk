@@ -49,14 +49,14 @@ async def read_last_100(
     return frcm_db_read_last_100(db)
 
 
-today_str = datetime.now().date().isoformat()
-yesterday_str = (datetime.now().date() + timedelta(days=-1)).isoformat()
+example_today_str = datetime.now().date().isoformat()
+example_yesterday_str = (datetime.now().date() + timedelta(days=-1)).isoformat()
 @router.get("/range", status_code=status.HTTP_200_OK)
 async def read_frcm_with_time_range(
     lon: float = Query(..., description="Longitude of the location", example=5.3327),
     lat: float = Query(..., description="Latitude of the location", example=60.383),
-    start_time: datetime = Query(..., description="Start time (ISO 8601)", example=yesterday_str + "T12:00:00Z"),
-    end_time: datetime = Query(..., description="End time (ISO 8601)", example=today_str + "T12:00:00Z"),
+    start_time: datetime = Query(..., description="Start time (ISO 8601)", example=example_yesterday_str + "T12:00:00Z"),
+    end_time: datetime = Query(..., description="End time (ISO 8601)", example=example_today_str + "T12:00:00Z"),
     user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
 ):
     location = Location(latitude=lat, longitude=lon)  

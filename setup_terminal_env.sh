@@ -23,3 +23,9 @@ set -a
 source .env.dynamic-frcm
 set +a
 echo "✅ env variables loaded from .env.dynamic-frcm"
+
+
+set -a
+source .env.frcm-api
+set +a
+echo "✅ env variables loaded from .env.frcm-api"
