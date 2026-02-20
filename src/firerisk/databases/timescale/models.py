@@ -1,5 +1,4 @@
-from datetime import datetime
-from typing import Optional
+
 from sqlalchemy import DateTime, Float, String, Index
 from sqlalchemy.orm import Mapped, mapped_column
 from src.firerisk.api.databases.timescale.database import TIMESCALE_Base
