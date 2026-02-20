@@ -465,6 +465,7 @@ dependencies = [
     { name = "python-jose", extra = ["cryptography"] },
     { name = "python-keycloak" },
     { name = "pyyaml" },
+    { name = "rich" },
     { name = "sqlalchemy" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -488,6 +489,7 @@ requires-dist = [
     { name = "python-jose", extras = ["cryptography"], specifier = ">=3.5.0" },
     { name = "python-keycloak", specifier = ">=7.1.1" },
     { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "rich", specifier = ">=14.3.3" },
     { name = "sqlalchemy", specifier = ">=2.0.46" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.41.0" },
 ]

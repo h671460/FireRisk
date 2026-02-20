@@ -1,154 +1,160 @@
-# src/firerisk/services/frcm_services.py
-
 import datetime as dt
 from zoneinfo import ZoneInfo
-from typing import Any, Dict, List
+from typing import List, Dict
 
+from fastapi import HTTPException
 from frcm.frcapi import METFireRiskAPI
 from frcm.datamodel.model import Location, WeatherData, FireRiskPrediction
+from pydantic import ValidationError
+from src.firerisk.databases.timescale.models import FireRisk
 
-OSLO_TZ = ZoneInfo("Europe/Oslo")
 UTC = dt.timezone.utc
 
 frc = METFireRiskAPI()
 
 
-def to_utc(ts: dt.datetime, assume_tz: ZoneInfo = OSLO_TZ) -> dt.datetime:
-    """
-    Normalize datetime to timezone-aware UTC.
-
-    - If naive: assume it's in `assume_tz` (Europe/Oslo by default)
-    - If aware: convert to UTC
-    """
+def to_utc(ts: dt.datetime) -> dt.datetime:
     if ts.tzinfo is None:
-        ts = ts.replace(tzinfo=assume_tz)
-    return ts.astimezone(UTC)
+        ts = ts.astimezone(UTC)
+    return ts
 
 
-def _prediction_map(pred: FireRiskPrediction) -> Dict[dt.datetime, float]:
-    # Using FireRisk.ttf as the numeric prediction value
-    out: Dict[dt.datetime, float] = {}
-    for r in pred.firerisks:
-        out[to_utc(r.timestamp)] = r.ttf
-    return out
+def risk_level_from_score(score: float) -> str:
+    # 🔧 adjust thresholds as needed
+    if score < 4:
+        return "low"
+    elif score < 8:
+        return "medium"
+    elif score < 12:
+        return "high"
+    return "extreme"
+
+
+def _prediction_map(pred: FireRiskPrediction):
+    return {to_utc(r.timestamp): r for r in pred.firerisks}
 
 
 def get_fire_risk_with_time_range(
     location: Location,
     start_time: dt.datetime,
     end_time: dt.datetime,
-) -> Dict[str, Any]:
-    """
-    Returns:
-      {
-        "location": {"latitude": ..., "longitude": ...},
-        "start_time": "...UTC...",
-        "end_time": "...UTC...",
-        "created": "...UTC...",
-        "data": [
-          {
-            "time": "...UTC...",
-            "lon": float,
-            "lat": float,
-            "humidity": float | None,
-            "temperature": float | None,
-            "wind_speed": float | None,
-            "firerisk_prediction": float | None,
-            "type": "observation" | "forecast"
-          },
-          ...
-        ]
-      }
-    """
+) -> List[FireRisk]:
+
     start_utc = to_utc(start_time)
     end_utc = to_utc(end_time)
+
     if end_utc < start_utc:
         raise ValueError("end_time must be >= start_time")
 
     now_utc = dt.datetime.now(tz=UTC)
-
-    # Fetch enough history so observations cover [start_time, now]
     obs_delta = now_utc - start_utc
-    if obs_delta.total_seconds() < 0:
-        obs_delta = dt.timedelta(0)
 
     wd: WeatherData = frc.get_weatherdata_now(location, obs_delta)
-    created_utc = to_utc(wd.created)
 
-    lat = location.latitude
-    lon = location.longitude
+    # Filter weather points
+    weather_points: Dict[dt.datetime, Dict] = {}
 
-    # Build a unique time index: prefer observation if both exist at same timestamp
-    by_ts: Dict[dt.datetime, Dict[str, Any]] = {}
-
-    # Observations (always "observation")
     for p in wd.observations.data:
         ts = to_utc(p.timestamp)
         if start_utc <= ts <= end_utc:
-            by_ts[ts] = {
-                "time": ts.isoformat(),
-                "lon": lon,
-                "lat": lat,
-                "humidity": p.humidity,
-                "temperature": p.temperature,
-                "wind_speed": p.wind_speed,
-                "firerisk_prediction": None,  # fill later
-                "type": "observation",
-            }
+            weather_points[ts] = p
 
-    # Forecast (only if not already covered by observation at same timestamp)
     for p in wd.forecast.data:
         ts = to_utc(p.timestamp)
-        if start_utc <= ts <= end_utc and ts not in by_ts:
-            by_ts[ts] = {
-                "time": ts.isoformat(),
-                "lon": lon,
-                "lat": lat,
-                "humidity": p.humidity,
-                "temperature": p.temperature,
-                "wind_speed": p.wind_speed,
-                "firerisk_prediction": None,  # fill later
-                "type": "observation" if ts <= now_utc else "forecast",
-            }
+        if start_utc <= ts <= end_utc and ts not in weather_points:
+            weather_points[ts] = p
 
-    # Compute predictions only for the filtered range
+    # Compute predictions
     wd_in_range = wd.model_copy(update={
-        "observations": wd.observations.model_copy(update={
-            "data": [p for p in wd.observations.data if start_utc <= to_utc(p.timestamp) <= end_utc]
-        }),
-        "forecast": wd.forecast.model_copy(update={
-            "data": [p for p in wd.forecast.data if start_utc <= to_utc(p.timestamp) <= end_utc]
-        }),
+        "observations": wd.observations.model_copy(
+            update={"data": [p for p in wd.observations.data if start_utc <= to_utc(p.timestamp) <= end_utc]}
+        ),
+        "forecast": wd.forecast.model_copy(
+            update={"data": [p for p in wd.forecast.data if start_utc <= to_utc(p.timestamp) <= end_utc]}
+        ),
     })
 
     pred: FireRiskPrediction = frc.compute(wd_in_range)
-    pred_by_ts = _prediction_map(pred)
+    pred_map = _prediction_map(pred)
 
-    # Merge prediction into rows (match by timestamp)
-    for ts, row in by_ts.items():
-        row["firerisk_prediction"] = pred_by_ts.get(ts)
+    results: List[FireRisk] = []
 
-    data_rows = [by_ts[ts] for ts in sorted(by_ts.keys())]
+    loc_str = f"{location.latitude},{location.longitude}"
 
-    return {
-        "location": {"latitude": lat, "longitude": lon},
-        "start_time": start_utc.isoformat(),
-        "end_time": end_utc.isoformat(),
-        "created": created_utc.isoformat(),
-        "data": data_rows,
-    }
+    for ts in sorted(weather_points.keys()):
+        w = weather_points[ts]
+        pred_obj = pred_map.get(ts)
 
+        # Skip rows without prediction (optional — remove if you want them)
+        if not pred_obj:
+            continue
+
+        score = float(pred_obj.ttf)
+
+        results.append(
+            FireRisk(
+                time=ts,
+                location=loc_str,
+                lat=location.latitude,
+                lon=location.longitude,
+                temperature=w.temperature,
+                humidity=w.humidity,
+                wind_speed=w.wind_speed,
+                risk_score=score,
+                risk_level=risk_level_from_score(score),
+            )
+        )
+
+    return results
 
 if __name__ == "__main__":
-    import pandas as pd
+    from datetime import timedelta
+    location = Location(latitude=60.383, longitude=5.3327)
+    obs_delta = timedelta(days=2)
+    start = dt.datetime(2024, 6, 1, tzinfo=UTC)
+    end = dt.datetime(2024, 6, 7, tzinfo=UTC)
     
-    location = Location(latitude=60.383, longitude=5.3327)  # Bergen
-    start_time = dt.datetime.now(tz=UTC) - dt.timedelta(days=3)
-    end_time = dt.datetime.now(tz=UTC) + dt.timedelta(days=1)
+    #  data data types debuf
+    dtyypes = {"start": str(type(start)), "end": str(type(end))}
+    from pprint import pprint
+    pprint(dtyypes)
+    print()
+    print()
+    
 
-    result = get_fire_risk_with_time_range(location, start_time, end_time)
-    df = pd.DataFrame(result["data"])
-    df["time"] = pd.to_datetime(df["time"], utc=True)
-    df = df.sort_values("time").reset_index(drop=True)
+    risks = get_fire_risk_with_time_range(location, start, end)
     
-    print(df.tail(20))
+    
+    from rich.table import Table
+    from rich.console import Console
+    def print_fire_risks(risks : List[FireRisk]):
+        table = Table(title="Fire Risk")
+
+        table.add_column("Time", justify="left")
+        table.add_column("Location")
+        table.add_column("Lat")
+        table.add_column("Lon")
+        table.add_column("Temp °C", justify="right")
+        table.add_column("Humidity %", justify="right")
+        table.add_column("Wind m/s", justify="right")
+        table.add_column("Score", justify="right")
+        table.add_column("Level")
+
+        for r in risks:
+            table.add_row(
+                r.time.strftime("%Y-%m-%d %H:%M"),
+                r.location,
+                f"{r.lat:.4f}",
+                f"{r.lon:.4f}",
+                f"{r.temperature:.1f}",
+                f"{r.humidity:.1f}",
+                f"{r.wind_speed:.1f}",
+                f"{r.risk_score:.2f}",
+                r.risk_level,
+            )
+
+        Console().print(table)
+        
+    print_fire_risks(risks)
+            
+            
