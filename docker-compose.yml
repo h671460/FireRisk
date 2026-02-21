@@ -16,7 +16,8 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
-    restart: always
+    restart: 
+      unless-stopped
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres/keycloakdb
