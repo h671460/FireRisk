@@ -29,3 +29,9 @@ set -a
 source .env.frcm-api
 set +a
 echo "✅ env variables loaded from .env.frcm-api"
+
+set -a
+source .env.frontend
+set +a
+echo "✅ env variables loaded from .env.frontend"
+

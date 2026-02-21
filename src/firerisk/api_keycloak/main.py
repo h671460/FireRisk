@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from src.firerisk.api_keycloak.routers.auth import get_user_info, has_roles, settings
 from src.firerisk.api_keycloak.schemas.userPayload import userPayload
@@ -12,6 +14,23 @@ app = FastAPI(
     }
 )
 
+# ✅ CORS
+origins = [
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3333",
+    "http://localhost:3333",
+    
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/healthy")
 def health_check():
