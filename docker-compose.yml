@@ -1,45 +1,63 @@
 services:
 
 
-  postgres:
-      image: postgres:17
-      container_name: postgres
-      restart: unless-stopped
-      environment:
-        POSTGRES_DB: keycloakdb
-        POSTGRES_USER: keycloak
-        POSTGRES_PASSWORD: keycloak
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
+  postgres:    
+    image: postgres:16
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak
+    ports:
+      - "5467:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: 
+      unless-stopped
+
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
-    restart: unless-stopped
-    depends_on:
-      - postgres
+    command: start-dev
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloakdb
+      KC_DB_URL: jdbc:postgresql://postgres-db:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak
 
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: 127.0.0.1
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_PROXY: edge
 
-      # IMPORTANT: advertise the external URL you will use from your PC
-      # Example: 
-      KC_HOSTNAME_URL: "http://${VM_IP}:8080"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
 
-      # Helps avoid strict hostname checks / redirect weirdness in dev
-      KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: true
 
-      # Optional but nice if you're behind NAT / reverse proxy later
-      KC_PROXY_HEADERS: "xforwarded"
-    command: ["start-dev", "--http-enabled=true", "--http-port=8080", "--hostname-strict=false"]
+
+
+      KC_HTTP_ENABLED: "true"
+
+    # volumes:
+    #   - ./keycloak-themes:/opt/keycloak/themes
     ports:
       - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+
+
 
 
   mailhog:
@@ -81,7 +99,6 @@ services:
     container_name: frcm-api
     ports:
       - "6767:6767"
-      - "8090:8080" # for keycloak testing
     depends_on:
       keycloak:
         condition: service_started

@@ -35,3 +35,14 @@ source .env.frontend
 set +a
 echo "✅ env variables loaded from .env.frontend"
 
+
+# set -a
+# source .env
+# set +a
+# echo "✅ env variables loaded from .env"
+
+
+set -a
+source .env.ngnix
+set +a
+echo "✅ env variables loaded from .env.ngnix"
