@@ -2,36 +2,45 @@ services:
 
 
   postgres:
-    image: postgres:17
-    container_name: postgres
-    restart: 
-      unless-stopped
-    environment:
-      POSTGRES_DB: keycloakdb
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloak
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      image: postgres:17
+      container_name: postgres
+      restart: unless-stopped
+      environment:
+        POSTGRES_DB: keycloakdb
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: keycloak
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
-    restart: 
-      unless-stopped
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres/keycloakdb
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      # Use "start" for production mode, "start-dev" for development/testing
-      KC_HOSTNAME: ${KC_HOST}
-    ports:
-      - "8080:8080"
-    command: start-dev # Change to 'start' for production
+    restart: unless-stopped
     depends_on:
       - postgres
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloakdb
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+
+      # IMPORTANT: advertise the external URL you will use from your PC
+      # Example: 
+      KC_HOSTNAME_URL: "http://${VM_IP}:8080"
+
+      # Helps avoid strict hostname checks / redirect weirdness in dev
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+
+      # Optional but nice if you're behind NAT / reverse proxy later
+      KC_PROXY_HEADERS: "xforwarded"
+    command: ["start-dev", "--http-enabled=true", "--http-port=8080", "--hostname-strict=false"]
+    ports:
+      - "8080:8080"
+
 
   mailhog:
     depends_on:
@@ -72,7 +81,7 @@ services:
     container_name: frcm-api
     ports:
       - "6767:6767"
-      - "8080:8080" # for keycloak testing
+      - "8090:8080" # for keycloak testing
     depends_on:
       keycloak:
         condition: service_started
