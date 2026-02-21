@@ -51,7 +51,7 @@ services:
     # volumes:
     #   - ./keycloak-themes:/opt/keycloak/themes
     ports:
-      - "8080:8080"
+      - "9090:8080"
     depends_on:
       - postgres
     restart: unless-stopped
