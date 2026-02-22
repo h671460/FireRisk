@@ -10,7 +10,7 @@ root.render(
   <React.StrictMode>
     <ReactKeycloakProvider
       authClient={keycloak}
-      initOptions={{ onLoad: "login-required", checkLoginIframe: false, pkceMethod: "S256" }}
+      initOptions={{ onLoad: "login-required", checkLoginIframe: false }}
       onEvent={(event, error) => console.log("KC event", event, error)}
       onTokens={(tokens) => console.log("KC tokens", tokens)}
     >
