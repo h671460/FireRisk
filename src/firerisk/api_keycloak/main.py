@@ -25,6 +25,8 @@ origins = [
     "http://localhost:3333",
     f"http://{FRONTEND_HOST}:3333",
     f"http://{FRONTEND_HOST}:3000",
+    f"https://{FRONTEND_HOST}:3333",
+    f"https://{FRONTEND_HOST}:3000",
     ]
 
 
