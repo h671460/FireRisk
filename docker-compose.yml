@@ -51,7 +51,7 @@ services:
     
 
 
-  nginx:
+  nginx-keycloak:
     image: nginx:1.19.0-alpine
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -106,8 +106,6 @@ services:
   frcm-api:
     build: .
     container_name: frcm-api
-    ports:
-      - "6767:6767"
     depends_on:
       keycloak:
         condition: service_started
@@ -117,6 +115,19 @@ services:
       unless-stopped
     env_file:
     - .env
+
+  nginx-frcm-api:
+    image: nginx:1.19.0-alpine
+    volumes:
+      - ./nginx/frcm-api.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    command: ["nginx-debug", "-g", "daemon off;"]
+    ports:
+      - "${APP_PORT}:443"
+    depends_on:
+      - frcm-api
+    networks:
+      - default
 
 
   frontend:
