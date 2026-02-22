@@ -30,10 +30,19 @@ ENV/
 .venv
 .venv/
 
+# env variables
+.env
+
 # Yosafe helpfull local files
 nrec.pem
 uzefull_commands.txt
-.env*
 generate_tree.sh
 tree.txt
 user_yosafe.txt
+
+
+#ngnix
+nginx/certs/
+certs/
+*.pem
+*.key

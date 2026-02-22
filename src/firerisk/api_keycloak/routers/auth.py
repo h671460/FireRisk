@@ -32,7 +32,6 @@ async def get_idp_public_key():
         "\n-----END PUBLIC KEY-----"
     )
 
-
 async def get_payload(token: str = Depends(oauth2_scheme)) -> dict:
     try:
         return keycloak_openid.decode_token(
