@@ -35,8 +35,8 @@ services:
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: "true"
 
-      KC_HOSTNAME: ${KC_PUBLIC_HOST}
-      KC_HOSTNAME_ADMIN: ${KC_HOSTNAME_ADMIN}
+      KC_HOSTNAME: https://${KC_PUBLIC_HOST}
+      KC_HOSTNAME_ADMIN: https://${KC_PUBLIC_HOST}
       KC_HOSTNAME_STRICT: "false"
     command: ["start-dev"]
     depends_on:
