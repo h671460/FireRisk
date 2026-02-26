@@ -47,48 +47,6 @@ services:
     
 
 
-  nginx-keycloak:
-    image: nginx:1.19.0-alpine
-    ports:
-      - "${NGINX_HTTP_PORT}:80"
-      - "${NGINX_HTTPS_PORT}:443"
-    volumes:
-      - ./nginx/keycloak.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    depends_on:
-      - keycloak
-    restart: unless-stopped
-
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: >
-      certonly --webroot
-      -w /var/www/certbot
-      --email ${email}
-      -d auth.${domain}
-      -d api.${domain}
-      -d ${domain}
-      --agree-tos
-      --non-interactive
-
-
-
-
-
-  # mailhog:
-  #   depends_on:
-  #     - keycloak
-  #   image: mailhog/mailhog
-  #   container_name: keycloak_mailhog
-  #   ports:
-  #     - "${MAILHOG_SMTP_PORT}:1025"
-  #     - "${MAILHOG_HTTP_PORT}:8025"
-  #   restart: unless-stopped
-
 
 
 
@@ -125,6 +83,55 @@ services:
       unless-stopped
     env_file:
     - .env
+
+
+  nginx:
+    image: nginx:1.19.0-alpine
+    ports:
+      - "${NGINX_HTTP_PORT}:80"
+      - "${NGINX_HTTPS_PORT}:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - keycloak
+      - frcm-api
+    restart: unless-stopped
+
+
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: >
+      certonly --webroot
+      -w /var/www/certbot
+      --email ${email}
+      -d auth.${domain}
+      -d api.${domain}
+      -d ${domain}
+      -d www.${domain}
+      --agree-tos
+      --non-interactive
+
+
+
+
+
+  # mailhog:
+  #   depends_on:
+  #     - keycloak
+  #   image: mailhog/mailhog
+  #   container_name: keycloak_mailhog
+  #   ports:
+  #     - "${MAILHOG_SMTP_PORT}:1025"
+  #     - "${MAILHOG_HTTP_PORT}:8025"
+  #   restart: unless-stopped
+
+
 
 
   # frontend:
