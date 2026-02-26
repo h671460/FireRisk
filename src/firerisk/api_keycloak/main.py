@@ -19,15 +19,9 @@ FRONTEND_HOST = os.getenv('KC_PUBLIC_IP_ADDRESS', 'localhost')
 
 # ✅ CORS
 origins = [
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-    "http://127.0.0.1:3333",
-    "http://localhost:3333",
-    f"http://{FRONTEND_HOST}:3333",
-    f"http://{FRONTEND_HOST}:3000",
-    f"https://{FRONTEND_HOST}:3333",
-    f"https://{FRONTEND_HOST}:3000",
-    ]
+    "https://fireriskgroup02.com",
+    "https://www.fireriskgroup02.com",
+]
 
 
 app.add_middleware(
