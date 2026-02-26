@@ -91,25 +91,25 @@ services:
 
 
 
-  # timescaledb:
-  #   image: timescale/timescaledb:latest-pg16 
-  #   container_name: timescaledb
-  #   environment:
-  #     - POSTGRES_USER=${TIMESCALE_USER}
-  #     - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD}
-  #     - POSTGRES_DB=${TIMESCALE_DATABASE}
-  #   ports: 
-  #     - "5468:5432"
-  #   volumes: 
-  #     - timescale_data:/var/lib/postgresql/data 
-  #     - ./init-timescaledb:/docker-entrypoint-initdb.d 
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${TIMESCALE_USER} -d ${TIMESCALE_DATABASE}"]
-  #     interval: 5s
-  #     timeout: 3s
-  #     retries: 10
-  #   restart: 
-  #     unless-stopped
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16 
+    container_name: timescaledb
+    environment:
+      - POSTGRES_USER=${TIMESCALE_USER}
+      - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD}
+      - POSTGRES_DB=${TIMESCALE_DATABASE}
+    ports: 
+      - "5468:5432"
+    volumes: 
+      - timescale_data:/var/lib/postgresql/data 
+      - ./init-timescaledb:/docker-entrypoint-initdb.d 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TIMESCALE_USER} -d ${TIMESCALE_DATABASE}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: 
+      unless-stopped
   
 
   # frcm-api:
