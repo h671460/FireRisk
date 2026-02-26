@@ -175,7 +175,7 @@ services:
 volumes:
   # frontend_node_modules:
   postgres_data:
-  # timescale_data:
+  timescale_data:
 
 
 networks:
