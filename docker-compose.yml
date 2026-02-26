@@ -39,6 +39,8 @@ services:
       KC_HOSTNAME_ADMIN: ${KC_PUBLIC_HOST}
       KC_HOSTNAME_STRICT: "false"
     command: ["start-dev"]
+    depends_on:
+      - postgres
     
 
 
