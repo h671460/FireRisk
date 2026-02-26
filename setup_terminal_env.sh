@@ -2,6 +2,6 @@
 
 export PYTHONPATH=$(pwd)
 set -a
-source .env
+source .env.vm
 set +a
-echo "✅ env variables loaded from .env"
+echo "✅ env variables loaded from .env.vm"
