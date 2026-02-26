@@ -116,6 +116,9 @@ services:
       -d www.${domain}
       --agree-tos
       --non-interactive
+      --expand
+      --keep-until-expiring
+        
 
 
 
