@@ -34,10 +34,13 @@ services:
 
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+
 
       KC_HOSTNAME: https://${KC_PUBLIC_HOST}
       KC_HOSTNAME_ADMIN: https://${KC_PUBLIC_HOST}
       KC_HOSTNAME_STRICT: "false"
+
     command: ["start-dev"]
     depends_on:
       - postgres
@@ -66,10 +69,10 @@ services:
       certonly --webroot
       -w /var/www/certbot
       --email ${email}
+      -d auth.${domain}
       -d ${domain}
       --agree-tos
       --non-interactive
-    
 
 
 
