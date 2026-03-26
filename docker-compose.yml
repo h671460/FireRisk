@@ -52,7 +52,7 @@ services:
 
 
   nginx-keycloak:
-    image: nginx:1.19.0-alpine
+    image: nginx:1.29.6-alpine
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
@@ -69,15 +69,15 @@ services:
 
 
 
-  mailhog:
-    depends_on:
-      - keycloak
-    image: mailhog/mailhog
-    container_name: keycloak_mailhog
-    ports:
-      - "${MAILHOG_SMTP_PORT}:1025"
-      - "${MAILHOG_HTTP_PORT}:8025"
-    restart: unless-stopped
+#  mailhog:
+#    depends_on:
+#      - keycloak
+#    image: mailhog/mailhog
+#    container_name: keycloak_mailhog
+#    ports:
+#      - "${MAILHOG_SMTP_PORT}:1025"
+#      - "${MAILHOG_HTTP_PORT}:8025"
+#    restart: unless-stopped
 
 
 
@@ -117,7 +117,7 @@ services:
     - .env
 
   nginx-frcm-api:
-    image: nginx:1.19.0-alpine
+    image: nginx:1.29.6-alpine
     volumes:
       - ./nginx/frcm-api.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
@@ -149,7 +149,7 @@ services:
 
 
   nginx-frontend:
-    image: nginx:1.19.0-alpine
+    image: nginx:1.29.6-alpine
     volumes:
       - ./nginx/frontend.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
