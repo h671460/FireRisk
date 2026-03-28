@@ -85,6 +85,8 @@ services:
       unless-stopped
     env_file:
     - .env
+    volumes:
+      - ./src/firerisk/api_keycloak:/app/src/firerisk/api_keycloak
 
 
 

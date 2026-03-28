@@ -37,8 +37,6 @@ app.add_middleware(
 def health_check():
     return {'status': 'Healthy'}
 
-
-
 app.include_router(frcm_route.router)
 app.include_router(user.router)
 
