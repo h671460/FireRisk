@@ -37,9 +37,11 @@ services:
       KC_PROXY: edge
 
 
-      KC_HOSTNAME: https://${KC_PUBLIC_HOST}
-      KC_HOSTNAME_ADMIN: https://${KC_PUBLIC_HOST}
+      KC_HOSTNAME: ${KC_HOSTNAME}
+      KC_HOSTNAME_ADMIN: ${KC_HOSTNAME_ADMIN}
       KC_HOSTNAME_STRICT: "false"
+
+      KC_HTTP_RELATIVE_PATH: /auth
 
     command: ["start-dev"]
     depends_on:
@@ -86,9 +88,6 @@ services:
 
 
 
-
-
-
   frontend:
     image: node:20-alpine
     working_dir: /app
@@ -108,8 +107,6 @@ services:
     env_file:
       - .env
 
-
-
   nginx:
     image: nginx:1.19.0-alpine
     ports:
@@ -117,38 +114,48 @@ services:
       - "${NGINX_HTTPS_PORT}:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
+      - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - keycloak
       - frcm-api
+      - frontend
     restart: unless-stopped
 
 
 
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: >
-      certonly --webroot
-      -w /var/www/certbot
-      --email ${email}
-      -d auth.${domain}
-      -d api.${domain}
-      -d ${domain}
-      -d www.${domain}
-      --agree-tos
-      --non-interactive
-      --expand
-      --keep-until-expiring
+# nrec VM
+  # nginx:
+  #   image: nginx:1.19.0-alpine
+  #   ports:
+  #     - "${NGINX_HTTP_PORT}:80"
+  #     - "${NGINX_HTTPS_PORT}:443"
+  #   volumes:
+  #     - ./nginx/conf.d:/etc/nginx/conf.d:ro
+  #     - ./certbot/conf:/etc/letsencrypt
+  #     - ./certbot/www:/var/www/certbot
+  #   depends_on:
+  #     - keycloak
+  #     - frcm-api
+  #   restart: unless-stopped
+
+  # certbot:
+  #   image: certbot/certbot
+  #   volumes:
+  #     - ./certbot/conf:/etc/letsencrypt
+  #     - ./certbot/www:/var/www/certbot
+  #   command: >
+  #     certonly --webroot
+  #     -w /var/www/certbot
+  #     --email ${email}
+  #     -d auth.${domain}
+  #     -d api.${domain}
+  #     -d ${domain}
+  #     -d www.${domain}
+  #     --agree-tos
+  #     --non-interactive
+  #     --expand
+  #     --keep-until-expiring
         
-
-
-
-
-
   # mailhog:
   #   depends_on:
   #     - keycloak

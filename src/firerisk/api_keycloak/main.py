@@ -11,7 +11,8 @@ app = FastAPI(
         "clientId": settings.client_id,               
         "clientSecret": settings.client_secret,
         "usePkceWithAuthorizationCodeGrant": True,
-    }
+    },
+    root_path="/api/v1",
 )
 
 import os

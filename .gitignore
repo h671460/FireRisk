@@ -46,3 +46,6 @@ nginx/certs/
 certs/
 *.pem
 *.key
+
+# kubernetes
+group2.csr
