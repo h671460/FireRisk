@@ -6,7 +6,7 @@ import datetime as dt
 
 from src.firerisk.databases.timescale.models import FireRisk
 
-# test query, db's last 100 records in descending order
+# test query, db'slast 100 records in descending order
 def frcm_db_read_last_100(db: Session):
     try:
         res = db.query(FireRisk).order_by(FireRisk.time.desc()).limit(100).all()

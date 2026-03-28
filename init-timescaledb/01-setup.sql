@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS fire_risk (
   risk_score    DOUBLE PRECISION NOT NULL,
   risk_level    TEXT             NOT NULL,
   created_at    TIMESTAMPTZ      NOT NULL DEFAULT now(),
-  PRIMARY KEY (time, location)
+  PRIMARY KEY (time, lat, lon, created_at)
 );
 
 SELECT create_hypertable('fire_risk', 'time', if_not_exists => TRUE);
