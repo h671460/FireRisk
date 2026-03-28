@@ -6,7 +6,7 @@ import datetime as dt
 
 from src.firerisk.databases.timescale.models import FireRisk
 
-
+# test query, db's last 100 records in descending order
 def frcm_db_read_last_100(db: Session):
     try:
         res = db.query(FireRisk).order_by(FireRisk.time.desc()).limit(100).all()
@@ -26,13 +26,26 @@ def frcm_db_check_range(
     end_time: dt.datetime,
 ) -> bool:
     try:
-        loc_str = f"{lat},{lon}"
+        if start_time.tzinfo is None:
+            start_time = start_time.replace(tzinfo=dt.timezone.utc)
+        if end_time.tzinfo is None:
+            end_time = end_time.replace(tzinfo=dt.timezone.utc)
+            
+        # SELECT MIN(time), MAX(time)
+        # FROM fire_risk
+        # WHERE lat = 60.383
+        # AND lon = 5.3327;
         result = (
             db.query(
                 func.min(FireRisk.time),
                 func.max(FireRisk.time),
             )
-            .filter(FireRisk.location == loc_str)
+            .filter(
+                and_(
+                    FireRisk.lat == lat,
+                    FireRisk.lon == lon,
+                )
+            )
             .one()
         )
         db_min, db_max = result
@@ -61,7 +74,14 @@ def frcm_db_get_range(
             start_time = start_time.replace(tzinfo=dt.timezone.utc)
         if end_time.tzinfo is None:
             end_time = end_time.replace(tzinfo=dt.timezone.utc)
-
+            
+        # SELECT *
+        # FROM fire_risk
+        # WHERE lat = 60.383
+        # AND lon = 5.3327
+        # AND time >= start_time
+        # AND time <= end_time
+        # ORDER BY time ASC;
         return (
             db.query(FireRisk)
             .filter(
@@ -85,23 +105,6 @@ def frcm_db_get_range(
 def frcm_db_save(db: Session, records: list[FireRisk]) -> None:
     try:
         for record in records:
-        #     existing = (
-        #         db.query(FireRisk)
-        #         .filter(
-        #             and_(
-        #                 FireRisk.time == record.time,
-        #                 FireRisk.location == record.location,
-        #             )
-        #         )
-        #         .first()
-        #     )
-        #     if existing:
-        #         existing.temperature = record.temperature
-        #         existing.humidity = record.humidity
-        #         existing.wind_speed = record.wind_speed
-        #         existing.risk_score = record.risk_score
-        #         existing.risk_level = record.risk_level
-        #     else:
             db.add(record)
         db.commit()
     except Exception as e:
