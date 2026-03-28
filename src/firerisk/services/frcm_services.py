@@ -13,9 +13,12 @@ UTC = dt.timezone.utc
 frc = METFireRiskAPI()
 
 
+def utc_now() -> dt.datetime:
+    return dt.datetime.now(tz=UTC)
+
 def to_utc(ts: dt.datetime) -> dt.datetime:
     if ts.tzinfo is None:
-        ts = ts.astimezone(UTC)
+        ts = ts.replace(tzinfo=UTC)
     return ts
 
 
@@ -80,6 +83,8 @@ def get_fire_risk_with_time_range(
     results: List[FireRisk] = []
 
     loc_str = f"{location.latitude},{location.longitude}"
+    
+    created_at = utc_now()
 
     for ts in sorted(weather_points.keys()):
         w = weather_points[ts]
@@ -90,6 +95,8 @@ def get_fire_risk_with_time_range(
             continue
 
         score = float(pred_obj.ttf)
+        
+        
 
         results.append(
             FireRisk(
@@ -102,9 +109,10 @@ def get_fire_risk_with_time_range(
                 wind_speed=w.wind_speed,
                 risk_score=score,
                 risk_level=risk_level_from_score(score),
+                created_at=created_at,
             )
         )
-
+        
     return results
 
 if __name__ == "__main__":

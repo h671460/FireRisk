@@ -12,7 +12,7 @@ from pprint import pprint
 
 
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=f"{settings.keycloak_public_url}realms/{settings.realm}/protocol/openid-connect/auth?prompt=login",#?prompt=login
+    authorizationUrl=f"{settings.keycloak_public_url}realms/{settings.realm}/protocol/openid-connect/auth",#?prompt=login",#?prompt=login
     tokenUrl=f"{settings.keycloak_public_url}realms/{settings.realm}/protocol/openid-connect/token",
 )
 

@@ -22,6 +22,8 @@ FRONTEND_HOST = os.getenv('KC_PUBLIC_IP_ADDRESS', 'localhost')
 origins = [
     "https://fireriskgroup02.com",
     "https://www.fireriskgroup02.com",
+    "https://localhost:3000",
+    "https://localhost:3333",
 ]
 
 

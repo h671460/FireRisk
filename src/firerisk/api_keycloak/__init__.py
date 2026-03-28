@@ -7,6 +7,7 @@ def main() -> None:
         host=os.getenv("APP_HOST", "localhost"),
         port=int(os.getenv("APP_PORT", 6767)),
         reload=True,
+        reload_dirs=["/app/src"],
     )
 
 

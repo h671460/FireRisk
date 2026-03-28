@@ -13,9 +13,11 @@ from src.firerisk.api_keycloak.schemas.userPayload import userPayload
 # database
 from src.firerisk.databases.timescale.database import TIMESCALE_SessionLocal
 
-# services
+# frcm services
 from src.firerisk.services.frcm_services import get_fire_risk_with_time_range
-from src.firerisk.services.database_services import frcm_db_read_last_100
+
+# database services
+from src.firerisk.services.database_services import frcm_db_read_last_100, frcm_db_check_range, frcm_db_get_range, frcm_db_save
 
 # dynamic-frcm
 from frcm.datamodel.model import Location
@@ -49,17 +51,32 @@ async def read_last_100(
     return frcm_db_read_last_100(db)
 
 
+
+
+
 example_today_str = datetime.now().date().isoformat()
 example_yesterday_str = (datetime.now().date() + timedelta(days=-1)).isoformat()
+
 @router.get("/range", status_code=status.HTTP_200_OK)
 async def read_frcm_with_time_range(
+    db: DB,
     lon: float = Query(..., description="Longitude of the location", example=5.3327),
     lat: float = Query(..., description="Latitude of the location", example=60.383),
     start_time: datetime = Query(..., description="Start time (ISO 8601)", example=example_yesterday_str + "T12:00:00Z"),
     end_time: datetime = Query(..., description="End time (ISO 8601)", example=example_today_str + "T12:00:00Z"),
     user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
-):
-    location = Location(latitude=lat, longitude=lon)  
-    return get_fire_risk_with_time_range(location, start_time,end_time)
-    # return each value data type for debugging
-    # return {"lon": str(type(lon)), "lat": str(type(lat)), "start_time": str(type(start_time)), "end_time": str(type(end_time))}
+):  
+    
+    if user is None:
+        return {"error": "Unauthorized"}
+    
+    location = Location(latitude=lat, longitude=lon)
+        
+    exists = frcm_db_check_range(db, lat, lon, start_time, end_time)
+
+    if exists:
+        return frcm_db_get_range(db, lat, lon, start_time, end_time)
+
+    records = get_fire_risk_with_time_range(location, start_time, end_time)
+    frcm_db_save(db, records)
+    return frcm_db_get_range(db, lat, lon, start_time, end_time)
