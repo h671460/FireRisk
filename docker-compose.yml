@@ -170,6 +170,16 @@ services:
 
 
 
+  mqtt-publisher:
+      build:
+        context: .
+        dockerfile: Dockerfile.mqtt
+      depends_on:
+        nginx:
+          condition: service_started
+      restart: unless-stopped
+      env_file:
+        - .env
 
 
 

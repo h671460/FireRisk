@@ -457,6 +457,7 @@ dependencies = [
     { name = "dynamic-frcm" },
     { name = "fastapi", extra = ["standard"] },
     { name = "jinja2" },
+    { name = "paho-mqtt" },
     { name = "pandas" },
     { name = "passlib" },
     { name = "psycopg2-binary" },
@@ -464,6 +465,7 @@ dependencies = [
     { name = "python-jose", extra = ["cryptography"] },
     { name = "python-keycloak" },
     { name = "pyyaml" },
+    { name = "requests" },
     { name = "rich" },
     { name = "sqlalchemy" },
     { name = "uvicorn", extra = ["standard"] },
@@ -479,7 +481,8 @@ requires-dist = [
     { name = "annotated-types", specifier = ">=0.7.0" },
     { name = "dynamic-frcm", specifier = "==1.0.2" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.129.0" },
-    { name = "jinja2", specifier = ">=3.1.6" },
+    { name = "jinja2", specifier = "==3.1.6" },
+    { name = "paho-mqtt", specifier = "==2.0.0" },
     { name = "pandas", specifier = ">=3.0.1" },
     { name = "passlib", specifier = ">=1.7.4" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
@@ -487,6 +490,7 @@ requires-dist = [
     { name = "python-jose", extras = ["cryptography"], specifier = ">=3.5.0" },
     { name = "python-keycloak", specifier = ">=7.1.1" },
     { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "requests", specifier = ">=2.32.5" },
     { name = "rich", specifier = ">=14.3.3" },
     { name = "sqlalchemy", specifier = ">=2.0.46" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.41.0" },
@@ -795,6 +799,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/fb/2b/9b9c33ffed44ee921d0967086d653047286054117d584f1b1a7c22ceaf7b/packaging-23.2.tar.gz", hash = "sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5", size = 146714, upload-time = "2023-10-01T13:50:05.279Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/1a/610693ac4ee14fcdf2d9bf3c493370e4f2ef7ae2e19217d7a237ff42367d/packaging-23.2-py3-none-any.whl", hash = "sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7", size = 53011, upload-time = "2023-10-01T13:50:03.745Z" },
+]
+
+[[package]]
+name = "paho-mqtt"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/73/b7/a4df0f93bbdae237e16ba402752151eceee576cbe80c235a2475fbf81eea/paho_mqtt-2.0.0.tar.gz", hash = "sha256:13b205f29251e4f2c66a6c923c31fc4fd780561e03b2d775cff8e4f2915cf947", size = 147711, upload-time = "2024-02-10T14:04:02.603Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/14/665ea683e6328af4418e55aec6ea9572adf4e0000ef70988db7fc99142c9/paho_mqtt-2.0.0-py3-none-any.whl", hash = "sha256:2ef745073dfc9aa68bfec30d0b9b6f0304ea75182bae85a7c77a80cefce1eff5", size = 66890, upload-time = "2024-02-10T14:03:59.894Z" },
 ]
 
 [[package]]
