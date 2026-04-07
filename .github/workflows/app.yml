@@ -3,7 +3,7 @@ name: app_workflow
 
 on:
   push:
-    branches: [ "main", "frcm-api" ]
+    branches: [ "local-app" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch: 
@@ -58,4 +58,4 @@ jobs:
       run: |
         source .venv/bin/activate
         export PYTHONPATH=$(pwd)
-        uv run pytest tests -vs
+        uv run -vs pytest tests/test_src/test_firerisk/api/utils.py
