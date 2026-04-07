@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from typing import List
 
 
 # auth
@@ -21,6 +22,10 @@ from src.firerisk.services.database_services import frcm_db_read_last_100, frcm_
 
 # dynamic-frcm
 from frcm.datamodel.model import Location
+
+from src.firerisk.databases.timescale.models import FireRisk
+
+
 
 router = APIRouter(
     prefix="/frcm", 
@@ -67,8 +72,11 @@ async def read_frcm_with_time_range(
     user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
 ):  
     
-    if user is None:
-        return {"error": "Unauthorized"}
+    if lon is None or lat is None or start_time is None or end_time is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Missing required query parameters: lat, lon, start_time, end_time"
+        )
     
     location = Location(latitude=lat, longitude=lon)
         
@@ -77,6 +85,13 @@ async def read_frcm_with_time_range(
     if exists:
         return frcm_db_get_range(db, lat, lon, start_time, end_time)
 
-    records = get_fire_risk_with_time_range(location, start_time, end_time)
+    try:
+        records = get_fire_risk_with_time_range(location, start_time, end_time)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to fetch fire risk data from frcm service"
+        )
+
     frcm_db_save(db, records)
     return frcm_db_get_range(db, lat, lon, start_time, end_time)
