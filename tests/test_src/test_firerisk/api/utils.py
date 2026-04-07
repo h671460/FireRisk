@@ -21,11 +21,11 @@ env_path = Path(".env")
 if env_path.exists():
     load_dotenv(env_path)
 
-TIMESCALE_USER = os.getenv("TEST_TIMESCALE_USER", "testuser")
-TIMESCALE_PASSWORD = os.getenv("TEST_TIMESCALE_PASSWORD", "testpassword")
-TIMESCALE_DB = os.getenv("TEST_TIMESCALE_DATABASE", "testdb")
-TIMESCALE_HOST = os.getenv("TEST_TIMESCALE_HOST", "localhost")
-TIMESCALE_PORT = os.getenv("TEST_TIMESCALE_PORT", "5432")
+TIMESCALE_USER = os.getenv("TIMESCALE_USER", "testuser")
+TIMESCALE_PASSWORD = os.getenv("TIMESCALE_PASSWORD", "testpassword")
+TIMESCALE_DB = os.getenv("TIMESCALE_DATABASE", "testdb")
+TIMESCALE_HOST = os.getenv("TIMESCALE_HOST", "localhost")
+TIMESCALE_PORT = os.getenv("TIMESCALE_PORT", "5432")
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{TIMESCALE_USER}:{TIMESCALE_PASSWORD}@{TIMESCALE_HOST}:{TIMESCALE_PORT}/{TIMESCALE_DB}"
 

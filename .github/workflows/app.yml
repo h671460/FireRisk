@@ -17,7 +17,33 @@ env:
 jobs:
   test_app:
     runs-on: ubuntu-latest
-    
+
+
+    services:
+      timescaledb:
+        image: timescale/timescaledb:latest-pg16
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        volumes:
+          - ${{ github.workspace }}/init-timescaledb:/docker-entrypoint-initdb.d
+        options: >-
+          --health-cmd="pg_isready -U testuser -d testdb"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
+
+  
+    env:
+      TIMESCALE_USER: testuser
+      TIMESCALE_PASSWORD: testpassword
+      TIMESCALE_DATABASE: testdb
+      TIMESCALE_HOST: localhost
+      TIMESCALE_PORT: 5432
+
     steps:
 
     - name: Checkout the code
