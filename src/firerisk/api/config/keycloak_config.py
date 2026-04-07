@@ -1,9 +1,10 @@
 import os
 
-from src.firerisk.api_keycloak.schemas.authConfiguration import authConfiguration
+from src.firerisk.api.schemas.authConfiguration import authConfiguration
 from dotenv import load_dotenv
 
-load_dotenv(".env.keycloak")
+if os.path.exists(".env"):  
+    load_dotenv(".env")
 
 KEYCLOAK_PUBLIC_URL = os.getenv("KEYCLOAK_PUBLIC_URL")
 KEYCLOAK_INTERNAL_URL = os.getenv("KEYCLOAK_INTERNAL_URL")

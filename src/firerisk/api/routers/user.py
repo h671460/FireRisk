@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from src.firerisk.api_keycloak.routers.auth import get_user_info, has_roles
-from src.firerisk.api_keycloak.schemas.userPayload import userPayload
+from src.firerisk.api.routers.auth import get_user_info, has_roles
+from src.firerisk.api.schemas.userPayload import userPayload
 
 
 router = APIRouter(

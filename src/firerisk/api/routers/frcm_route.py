@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 
 # auth
-from src.firerisk.api_keycloak.routers.auth import has_roles
-from src.firerisk.api_keycloak.schemas.userPayload import userPayload
+from src.firerisk.api.routers.auth import has_roles
+from src.firerisk.api.schemas.userPayload import userPayload
 
 
 # database

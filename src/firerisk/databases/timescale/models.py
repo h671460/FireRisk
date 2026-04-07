@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import DateTime, Float, String, Index, func
 from sqlalchemy.orm import Mapped, mapped_column
-from src.firerisk.api.databases.timescale.database import TIMESCALE_Base
+from src.firerisk.databases.timescale.database import TIMESCALE_Base
 
 class FireRisk(TIMESCALE_Base):
     __tablename__ = "fire_risk"
