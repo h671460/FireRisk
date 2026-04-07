@@ -2,7 +2,7 @@ name: app_workflow
 
 on:
   push:
-    branches: ["main"]
+    branches: ["local-app"]
   pull_request:
     branches: ["main"]
   workflow_dispatch:
