@@ -60,4 +60,4 @@ jobs:
       run: |
         source .venv/bin/activate
         export PYTHONPATH=$(pwd)
-        uv run -vs pytest tests/test_src/test_firerisk/api/utils.py
+        uv run -vs pytest tests/test_src/test_firerisk/api&/test_route/test_user.py
