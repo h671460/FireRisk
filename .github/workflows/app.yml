@@ -87,9 +87,21 @@ jobs:
         source .venv/bin/activate
         uv sync --locked
 
+    - name: Test with pytest test_main
+      run: |
+        source .venv/bin/activate
+        export PYTHONPATH=$(pwd)
+        uv run pytest -vs tests/test_src/test_firerisk/api/test_main
 
-    - name: Test with pytest
+
+    - name: Test with pytest test_user
       run: |
         source .venv/bin/activate
         export PYTHONPATH=$(pwd)
         uv run pytest -vs tests/test_src/test_firerisk/api/test_route/test_user.py
+
+    - name: Test with pytest test_frcm_route
+      run: |
+        source .venv/bin/activate
+        export PYTHONPATH=$(pwd)
+        uv run pytest -vs tests/test_src/test_firerisk/api/test_route/test_frcm_route.py
