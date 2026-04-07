@@ -1,4 +1,4 @@
-from tests.test_src.test_firerisk.api.utils import (
+from tests.test_src.test_firerisk.api.user_utils import (
     client,
     app,
     override_get_user_info_admin,

@@ -1,20 +1,15 @@
-import os
-from datetime import datetime, timezone
-from dotenv import load_dotenv
-
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
 import pytest
+from datetime import datetime, timezone
+import os
+from dotenv import load_dotenv
 
-from src.firerisk.api.main import app
-from src.firerisk.api.routers.auth import get_user_info
-from src.firerisk.api.routers.frcm_route import get_db
-from src.firerisk.api.schemas.userPayload import userPayload
+
 from src.firerisk.databases.timescale.database import TIMESCALE_Base
+from tests.test_src.test_firerisk.api.user_utils import app
+from src.firerisk.api.routers.frcm_route import get_db
 from src.firerisk.databases.timescale.models import FireRisk
-
-
 from pathlib import Path
 
 env_path = Path(".env")
@@ -40,58 +35,8 @@ def override_get_db():
         yield db
     finally:
         db.close()
-
-
-def override_get_user_info_admin():
-    return userPayload(
-        id="test-user-id",
-        username="testuser",
-        email="testuser@example.com",
-        first_name="Test",
-        last_name="User",
-        realm_roles=["admin", "default-roles-frcm-realm"],
-    )
-
-
-def override_get_user_info_developer():
-    return userPayload(
-        id="test-user-id",
-        username="testuser",
-        email="testuser@example.com",
-        first_name="Test",
-        last_name="User",
-        realm_roles=["developer", "default-roles-frcm-realm"],
-    )
-
-
-def override_get_user_info_default():
-    return userPayload(
-        id="test-user-id",
-        username="testuser",
-        email="testuser@example.com",
-        first_name="Test",
-        last_name="User",
-        realm_roles=["default-roles-frcm-realm"],
-    )
-
-
-def override_get_user_info_no_roles():
-    return userPayload(
-        id="test-user-id",
-        username="testuser",
-        email="testuser@example.com",
-        first_name="Test",
-        last_name="User",
-        realm_roles=[],
-    )
-
-
-app.dependency_overrides[get_user_info] = override_get_user_info_admin
+        
 app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
-
-
 @pytest.fixture
 def test_fire_risk():
     fire_risk = FireRisk(
