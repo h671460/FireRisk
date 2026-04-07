@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 if os.path.exists(".env"):  
     load_dotenv(".env")
 
-KEYCLOAK_PUBLIC_URL = os.getenv("KEYCLOAK_PUBLIC_URL")
-KEYCLOAK_INTERNAL_URL = os.getenv("KEYCLOAK_INTERNAL_URL")
-REALM = os.getenv("REALM")
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-AUTHORIZATION_URL = os.getenv("AUTHORIZATION_URL")
-TOKEN_URL = os.getenv("TOKEN_URL")
+KEYCLOAK_PUBLIC_URL = os.getenv("KEYCLOAK_PUBLIC_URL", "http://localhost:8080")
+KEYCLOAK_INTERNAL_URL = os.getenv("KEYCLOAK_INTERNAL_URL", "http://keycloak:8080")
+REALM = os.getenv("REALM", "frcm-realm")
+CLIENT_ID = os.getenv("CLIENT_ID", "frcm-api-client")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET", "your-client-secret")
+AUTHORIZATION_URL = os.getenv("AUTHORIZATION_URL", f"{KEYCLOAK_PUBLIC_URL}/realms/{REALM}/protocol/openid-connect/auth")
+TOKEN_URL = os.getenv("TOKEN_URL", f"{KEYCLOAK_PUBLIC_URL}/realms/{REALM}/protocol/openid-connect/token")
 
 
 settings = authConfiguration(
