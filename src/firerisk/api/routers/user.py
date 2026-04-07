@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+
 
 from src.firerisk.api.routers.auth import get_user_info, has_roles
 from src.firerisk.api.schemas.userPayload import userPayload
