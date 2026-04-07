@@ -9,11 +9,11 @@ def must_get(name: str) -> str:
         raise RuntimeError(f"Missing env var: {name}")
     return v
 
-TIMESCALE_USER = must_get("TIMESCALE_USER")
-TIMESCALE_PASSWORD = must_get("TIMESCALE_PASSWORD")
-TIMESCALE_DB = must_get("TIMESCALE_DATABASE")
-TIMESCALE_HOST = must_get("TIMESCALE_HOST")
-TIMESCALE_PORT = must_get("TIMESCALE_PORT")
+TIMESCALE_USER = must_get("TIMESCALE_USER", "defaultuser")
+TIMESCALE_PASSWORD = must_get("TIMESCALE_PASSWORD", "defaultpassword")
+TIMESCALE_DB = must_get("TIMESCALE_DATABASE", "defaultdb")
+TIMESCALE_HOST = must_get("TIMESCALE_HOST", "localhost")
+TIMESCALE_PORT = must_get("TIMESCALE_PORT", "5432")
 TIMESCALE_SCHEMA = os.getenv("TIMESCALE_SCHEMA", "public")
 
 print(f"TimescaleDB config: user={TIMESCALE_USER}, db={TIMESCALE_DB}, host={TIMESCALE_HOST}, port={TIMESCALE_PORT}, schema={TIMESCALE_SCHEMA}")
