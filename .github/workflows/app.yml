@@ -40,16 +40,16 @@ jobs:
         python -m pip install --user pipx
         pipx install uv
 
-    # - name: Cache dependencies
-    #   uses: actions/cache@v4
-    #   id: cache
-    #   with:
-    #     path: ./.venv
-    #     key: venv-${{ hashFiles('**/uv.lock')}}
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      id: cache
+      with:
+        path: ./.venv
+        key: venv-${{ hashFiles('**/uv.lock')}}
 
     - name: Install uv dependencies
-      # if: steps.cache.outputs.cache-hit != 'true'
-      if: true
+      if: steps.cache.outputs.cache-hit != 'true'
+      # if: true
       run: |
         uv venv
         source .venv/bin/activate
@@ -60,4 +60,4 @@ jobs:
       run: |
         source .venv/bin/activate
         export PYTHONPATH=$(pwd)
-        uv run pytest -vs tests/test_src/test_firerisk/api&/test_route/test_user.py
+        uv run pytest -vs tests/test_src/test_firerisk/api/test_route/test_user.py
