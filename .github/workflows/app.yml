@@ -49,8 +49,10 @@ jobs:
 
     - name: Install uv dependencies
       if: steps.cache.outputs.cache-hit != 'true'
+      # if: true
       run: |
         uv venv
+        source .venv/bin/activate
         uv sync --locked
 
 
