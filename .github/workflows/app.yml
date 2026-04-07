@@ -8,6 +8,12 @@ on:
     branches: [ "main" ]
   workflow_dispatch: 
 
+
+
+env:
+  MET_CLIENT_ID: ${{ secrets.MET_CLIENT_ID }}
+  MET_CLIENT_SECRET: ${{ secrets.MET_CLIENT_SECRET }}
+
 jobs:
   test_app:
     runs-on: ubuntu-latest
