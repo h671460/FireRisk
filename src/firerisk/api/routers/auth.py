@@ -1,5 +1,7 @@
 from fastapi.security import OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer
 from keycloak import KeycloakOpenID  # pip require python-keycloak
+from typing import List, Callable
+
 from src.firerisk.api.config.keycloak_config import settings
 from fastapi import Security, HTTPException, status, Depends
 from src.firerisk.api.schemas.userPayload import userPayload
@@ -65,8 +67,6 @@ async def get_user_info(payload: dict = Depends(get_payload)) -> userPayload:
         )
 
 
-from fastapi import Depends, HTTPException, status
-from typing import List, Callable
 
 def has_roles(required_roles: List[str]) -> Callable:
     async def checker(user: userPayload = Depends(get_user_info)) -> userPayload:

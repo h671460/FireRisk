@@ -57,12 +57,12 @@ jobs:
     - name: Test with pytest test_main
       run: |
         export PYTHONPATH=$(pwd)
-        uv run python -m pytest -vs tests/test_src/test_firerisk/api/test_main.py
+        uv run pytest -vs tests/test_src/test_firerisk/api/test_main.py
 
     - name: Test with pytest test_user
       run: |
         export PYTHONPATH=$(pwd)
-        uv run python -m pytest -vs tests/test_src/test_firerisk/api/test_route/test_user.py
+        uv run pytest -vs tests/test_src/test_firerisk/api/test_route/test_user.py
 
   integration_tests:
     runs-on: ubuntu-latest
@@ -133,7 +133,7 @@ jobs:
     - name: Test with pytest test_frcm_route
       run: |
         export PYTHONPATH=$(pwd)
-        uv run python -m pytest -vs tests/test_src/test_firerisk/api/test_route/test_frcm_route.py
+        uv run pytest -vs tests/test_src/test_firerisk/api/test_route/test_frcm_route.py
 
   build_docker_images:
     runs-on: ubuntu-latest
