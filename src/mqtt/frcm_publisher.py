@@ -15,8 +15,8 @@ import src.mqtt.connector.configuration as mqtt_configuration
 import os
 # Keycloak config
 KEYCLOAK_TOKEN_URL = os.getenv("KEYCLOAK_TOKEN_URL")
-MQTT_CLIENT_ID = os.getenv("MQTT_CLIENT_ID")
-MQTT_CLIENT_SECRET = os.getenv("MQTT_CLIENT_SECRET")
+MQTT_CLIENT_ID = os.getenv("MQTT_KEYCLOAK_CLIENT_ID")
+MQTT_CLIENT_SECRET = os.getenv("MQTT_KEYCLOAK_CLIENT_SECRET")
 
 # Fire risk API
 FIRERISK_API_URL = os.getenv("FIRERISK_API_URL")
@@ -75,7 +75,7 @@ class FireriskPublisher:
 
         
         start_time = (datetime.now(timezone.utc) - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        end_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_time =( datetime.now(timezone.utc) + timedelta(days=2) ).strftime("%Y-%m-%dT%H:%M:%SZ")
         params = {
             "lat": self.latitude,
             "lon": self.longitude,
@@ -101,18 +101,19 @@ class FireriskPublisher:
     def run(self):
         print("Starting FireriskPublisher...")
 
-        while True:
-            try:
-                self.publish_firerisk()
+        # while True:
+        try:
+            self.publish_firerisk()
 
-            except requests.HTTPError as e:
-                print(f"API error: {e}")
+        except requests.HTTPError as e:
+            print(f"API error: {e}")
 
-            except Exception as e:
-                print(f"Unexpected error: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
 
-            print(f"Waiting {PUBLISH_INTERVAL} seconds...")
-            time.sleep(PUBLISH_INTERVAL)
+        print(f"Waiting {PUBLISH_INTERVAL} seconds...")
+        # time.sleep(PUBLISH_INTERVAL)
+        
 
 
 if __name__ == "__main__":
