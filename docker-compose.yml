@@ -116,9 +116,12 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
-      - keycloak
-      - frcm-api
-      - frontend
+      keycloak:
+        condition: service_started
+      frcm-api:
+        condition: service_started
+      frontend:
+        condition: service_started
     restart: unless-stopped
 
 
