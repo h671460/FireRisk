@@ -1,15 +1,7 @@
 #!/bin/bash
 
-
-
+export PYTHONPATH=$(pwd)
 set -a
-source .env.postgres
+source .env
 set +a
-
-echo "✅ env variables loaded from .env.postgres"
-
-
-set -a
-source .env.timescale
-set +a
-echo "✅ env variables loaded from .env.timescale"
+echo "✅ env variables loaded from .env"

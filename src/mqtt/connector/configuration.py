@@ -1,0 +1,72 @@
+from decouple import config
+import yaml
+
+import argparse
+import os
+
+from jinja2 import Template
+
+def load_config(config_path: str) -> dict:
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+
+    def env_var(key: str, default=None, required: bool = False):
+        val = os.getenv(key, default)
+        if (val is None or val == "") and (required or default is None):
+            raise KeyError(f"Missing required environment variable: {key}")
+        return val
+
+    try:
+        with open(config_path, "r") as f:
+            template = Template(f.read())
+            rendered = template.render(env_var=env_var)
+            return yaml.safe_load(rendered) or {}
+    except Exception as e:
+        raise Exception(f"Error reading config file: {e}")
+
+class ConfigurationException(Exception):
+    pass
+
+
+class ClientConfiguration:
+
+    def __init__(self, config_file: str):
+        try:
+            config_dict = load_config(config_file)
+            self.USERNAME = config_dict['BROKER_USERNAME']
+            self.PASSWORD = config_dict['BROKER_PASSWORD']
+            self.BROKER_HOST = config_dict['BROKER_HOST']
+            self.BROKER_PORT = int(config_dict['BROKER_PORT'])
+            self.BROKER_TOPIC = config_dict['BROKER_TOPIC']
+            self.TOPIC_QOS = int(config_dict['TOPIC_QOS'])
+            self.CLIENT_ID = config_dict['CLIENT_ID']
+
+            # with open(config_file) as f:
+            #     conf = yaml.load(f, Loader=yaml.FullLoader)
+                # self.BROKER_HOST = conf['BROKER_HOST']
+                # self.BROKER_PORT = conf['BROKER_PORT']
+                # self.BROKER_TOPIC = conf['BROKER_TOPIC']
+                # self.TOPIC_QOS = conf['TOPIC_QOS']
+                # self.CLIENT_ID = conf['CLIENT_ID']
+
+        except Exception as e:
+            # raise ConfigurationException(f"Error when reading from config file: {e}")
+            raise ConfigurationException(f"Error when reading from config file: {e}")
+
+    def __str__(self) -> str:
+        return ''.join((f'Publisher Client Configuration: \n',
+                        f'BROKER TOPIC: {self.BROKER_TOPIC}:{self.TOPIC_QOS} \n',
+                        f'BROKER: {self.BROKER_HOST}:{self.BROKER_PORT} \n',
+                        f'CLIENT ID: {self.CLIENT_ID}'))
+
+
+def get_config_file():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--configfile", required=True, help="Path to the config file")
+    args = parser.parse_args()
+
+    if not os.path.exists(args.configfile):
+        raise ConfigurationException(f"Error: The configfile '{args.configfile}' does not exist.")
+
+    return args.configfile

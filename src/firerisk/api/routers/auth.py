@@ -1,126 +1,82 @@
-import os
-from fastapi import APIRouter, Depends, HTTPException, status
-from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from pydantic import BaseModel
-from typing import Annotated
-from sqlalchemy.orm import Session
-from datetime import timedelta, datetime, timezone
-from jose import jwt, JWTError
+from fastapi.security import OAuth2PasswordBearer, OAuth2AuthorizationCodeBearer
+from keycloak import KeycloakOpenID  # pip require python-keycloak
+from typing import List, Callable
+
+from src.firerisk.api.config.keycloak_config import settings
+from fastapi import Security, HTTPException, status, Depends
+from src.firerisk.api.schemas.userPayload import userPayload
+
+from pprint import pprint
+
+# oauth2_scheme = OAuth2PasswordBearer(
+#     tokenUrl=settings.token_url
+# )
 
 
+oauth2_scheme = OAuth2AuthorizationCodeBearer(
+    authorizationUrl=f"{settings.keycloak_public_url}realms/{settings.realm}/protocol/openid-connect/auth",#?prompt=login",#?prompt=login
+    tokenUrl=f"{settings.keycloak_public_url}realms/{settings.realm}/protocol/openid-connect/token",
+)
 
-from src.firerisk.api.databases.postgres.database import POSTGRES_SessionLocal
-from src.firerisk.api.databases.postgres.models import Users
-
-
-router = APIRouter(
-    prefix='/auth',
-    tags=['auth']
+keycloak_openid = KeycloakOpenID(
+    server_url=settings.keycloak_internal_url,
+    client_id=settings.client_id,
+    realm_name=settings.realm,
+    client_secret_key=settings.client_secret,
+    verify=True
 )
 
 
-try:
-    # genereated usng openssl rand -hex 32
-    SECRET_KEY = os.getenv("SECRET_KEY")
-    ALGORITHM = os.getenv("ALGORITHM")
-    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
-except KeyError as e:
-    raise KeyError(f"Environment variable {str(e)} is not set. Please set it before running the application.")
-
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
-
-
-class CreateUserRequest(BaseModel):
-    username: str
-    email: str
-    first_name: str
-    last_name: str
-    password: str
-    
-    
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-def get_db():
-    db = POSTGRES_SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
-
-
-def authenticate_user(username: str, password: str, db):
-    user = db.query(Users).filter(Users.username == username).first()
-    if not user:
-        return False
-    if not bcrypt_context.verify(password, user.hashed_password):
-        return False
-    return user
-
-
-def create_access_token(username: str, user_id: int, role: str, expires_delta: timedelta):
-    encode = {'sub': username, 'id': user_id, 'role': role}
-    expires = datetime.now(timezone.utc) + expires_delta
-    encode.update({'exp': expires})
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-
-
-async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)],db: db_dependency):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
-        user_id: int = payload.get('id')
-        user_role: str = payload.get('role')
-        if username is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail='Could not validate user.')
-        return {'username': username, 'id': user_id, 'role': user_role}
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail='Could not validate user.')
-        
-        
-
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_user(db: db_dependency,
-                      create_user_request: CreateUserRequest):
-    create_user_model = Users(
-        username=create_user_request.username,
-        email=create_user_request.email,
-        first_name=create_user_request.first_name,
-        last_name=create_user_request.last_name,
-        hashed_password=bcrypt_context.hash(create_user_request.password)
+async def get_idp_public_key():
+    return (
+        "-----BEGIN PUBLIC KEY-----\n"
+        f"{keycloak_openid.public_key()}"
+        "\n-----END PUBLIC KEY-----"
     )
-    
-    if db.query(Users).filter(Users.username == create_user_request.username).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail='Username already exists.')
-        
-    if db.query(Users).filter(Users.email == create_user_request.email).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail='Email already exists.')
-        
-    db.add(create_user_model)
-    db.commit()
+
+async def get_payload(token: str = Depends(oauth2_scheme)) -> dict:
+    try:
+        return keycloak_openid.decode_token(
+            token,
+            validate=True,
+            check_claims={"aud": None}  # disables aud check
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+async def get_user_info(payload: dict = Depends(get_payload)) -> userPayload:
+    try:
+        return userPayload(
+            id=payload.get("sub"),
+            username=payload.get("preferred_username"),
+            email=payload.get("email"),
+            first_name=payload.get("given_name"),
+            last_name=payload.get("family_name"),
+            realm_roles=payload.get("realm_access", {}).get("roles", []),
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 
-@router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-                                 db: db_dependency):
-    user = authenticate_user(form_data.username, form_data.password, db)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail='Could not validate user.')
-    token = create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
+def has_roles(required_roles: List[str]) -> Callable:
+    async def checker(user: userPayload = Depends(get_user_info)) -> userPayload:
+        user_roles = user.realm_roles 
 
-    return {'access_token': token, 'token_type': 'bearer'}
+        if not any(r in user_roles for r in required_roles):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Insufficient role permissions. Required: {required_roles}",
+            )
+        return user
 
+    return checker

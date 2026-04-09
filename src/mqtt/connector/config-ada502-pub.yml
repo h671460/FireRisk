@@ -1,0 +1,7 @@
+BROKER_USERNAME: "{{ env_var('BROKER_USERNAME')}}"
+BROKER_PASSWORD: "{{ env_var('BROKER_PASSWORD')}}"
+BROKER_HOST: "{{ env_var('BROKER_HOST')}}"
+BROKER_PORT: "{{ env_var('BROKER_PORT')}}"
+BROKER_TOPIC: "{{ env_var('BROKER_TOPIC')}}"
+TOPIC_QOS: "{{ env_var('TOPIC_QOS')}}"
+CLIENT_ID: "{{ env_var('FIRERISK_PUBLISHER_CLIENT_ID')}}"
