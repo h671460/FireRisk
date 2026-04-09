@@ -122,6 +122,7 @@ if __name__ == "__main__":
     
     config_file = mqtt_configuration.get_config_file()
     
+    # bergen
     latitude=60.383
     longitude=5.3327
 
