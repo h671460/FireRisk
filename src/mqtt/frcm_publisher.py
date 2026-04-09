@@ -101,7 +101,7 @@ class FireriskPublisher:
     def run(self):
         print("Starting FireriskPublisher...")
 
-        # while True:
+        # while True: 
         try:
             self.publish_firerisk()
 

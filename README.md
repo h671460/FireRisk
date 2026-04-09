@@ -6,9 +6,11 @@ FireRisk is a Python-based project for fire risk prediction.
 
 - Docker Desktop installed and running on your machine
 
+---
+
 ## Setup
 
-### Create the `.env` file
+### 1. Create the `.env` file
 
 In the root of the project, create a file named `.env` and fill in the following environment variables:
 
@@ -42,17 +44,16 @@ APP_PORT=6767
 REALM=frcm-realm
 CLIENT_ID=frcm-api-client
 
-# change this to your actual client secret! go to the client -> credentials and copy client secret
+# Go to the client -> Credentials and copy the client secret
 CLIENT_SECRET=""
 KEYCLOAK_PUBLIC_URL=https://${KC_SOURCE_ENDPOINT}/
 KEYCLOAK_INTERNAL_URL=http://keycloak:8080/auth/
 
-# dynamic.frcm needs these env variables, since it uses https://frost.met.no/ API.
-# you can request these values from here https://frost.met.no/auth/requestCredentials.html
+# dynamic.frcm uses https://frost.met.no/ - request credentials at:
+# https://frost.met.no/auth/requestCredentials.html
 MET_CLIENT_ID=
 MET_CLIENT_SECRET=
 
-# not used in code, still have it in the .env, because these env variables might be called with os.getenv("")
 AUTHORIZATION_URL=https://${KC_SOURCE_ENDPOINT}/realms/frcm-realm/protocol/openid-connect/auth
 TOKEN_URL=https://${KC_SOURCE_ENDPOINT}/realms/frcm-realm/protocol/openid-connect/token
 
@@ -76,24 +77,20 @@ PUBLISH_INTERVAL=30
 
 KEYCLOAK_TOKEN_URL="https://nginx/auth/realms/frcm-realm/protocol/openid-connect/token"
 MQTT_KEYCLOAK_CLIENT_ID="mqtt-client"
-# change this to your actual mqtt-client client secret
+# Go to the mqtt-client -> Credentials and copy the client secret
 MQTT_KEYCLOAK_CLIENT_SECRET=""
 FIRERISK_API_URL="https://nginx/api/v1/frcm/range"
 ```
 
-### Load environment variables
-
-Run the following command to load the environment variables into your terminal session:
+### 2. Load environment variables
 
 ```bash
 source ./setup_terminal_env.sh
 ```
 
-### Generate SSL certificates
+### 3. Generate SSL certificates
 
-Create the certs folder and generate a self-signed certificate for local development.
-
-On Windows (Git Bash):
+**Windows (Git Bash):**
 
 ```bash
 mkdir -p nginx/certs
@@ -103,7 +100,7 @@ MSYS_NO_PATHCONV=1 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -subj "/CN=localhost"
 ```
 
-On Mac/Linux:
+**Mac/Linux:**
 
 ```bash
 mkdir -p nginx/certs
@@ -113,18 +110,23 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -subj "/CN=localhost"
 ```
 
-### Check that the following are commented out
+### 4. Comment out services in `docker-compose.yml`
 
 In `docker-compose.yml`, make sure the `nginx` depends_on section looks like this:
 
 ```yaml
 depends_on:
-  - keycloak
-  # - frcm-api
-  # - frontend
+  keycloak:
+    condition: service_started
+  # frcm-api:
+  #   condition: service_started
+  # frontend:
+  #   condition: service_started
 ```
 
-In `nginx/conf.d/localhost.conf`, make sure the api and frontend location blocks are commented out:
+### 5. Comment out location blocks in `nginx/conf.d/localhost.conf`
+
+Make sure the api and frontend location blocks are commented out:
 
 ```nginx
 location /auth/ {
@@ -147,35 +149,27 @@ location /auth/ {
 # }
 ```
 
-### Start Keycloak
-
-Run the following command to start Postgres, Keycloak, and Nginx:
+### 6. Start Keycloak
 
 ```bash
 docker compose up -d --build nginx
 ```
 
-### Access Keycloak
+### 7. Access Keycloak
 
-Once the containers are running, open your browser and go to:
-
-```
-https://localhost/auth/
-```
+Once the containers are running, open your browser and go to `https://localhost/auth/`.
 
 > **Note:** Keycloak may take a minute or two to fully start up. If the page does not load immediately, wait a moment and refresh.
 
-Since the SSL certificate is self-signed, your browser will warn you that the connection is not secure. This is expected for local development. Find the "Advanced" or "Show details" option and click "Continue anyway" or "Proceed to localhost" to access the app.
+Since the certificate is self-signed, your browser will show a security warning. Click **Advanced** (or **Show details**) and then **Continue anyway** (or **Proceed to localhost**). Log in with the admin credentials from your `.env` file.
 
-Log in with the admin credentials you set in your `.env` file.
+---
 
 ## Keycloak Configuration
 
 ### Create a realm
 
-After logging in as admin, create a new realm called `frcm-realm`.
-
-Then go to **Realm settings -> Login** and turn on the following:
+After logging in, create a new realm named `frcm-realm`. Then go to **Realm settings -> Login** and enable the following:
 
 - User registration: **On**
 - Forgot password: **On**
@@ -183,85 +177,63 @@ Then go to **Realm settings -> Login** and turn on the following:
 
 ### Create clients
 
-Head to **Clients** and create the following three clients.
+Go to **Clients** and create the following three clients.
 
 #### frcm-api-client
 
-Create a new client with Client ID `frcm-api-client`.
-
-On the next page, turn on **Client authentication** and check the following authentication flows:
-
-- Standard flow
-- Direct access grants
-- Implicit flow
-- Service account roles
-
-On the next page, set the following:
+Create a client with Client ID `frcm-api-client`. Enable **Client authentication** and check: Standard flow, Direct access grants, Implicit flow, Service account roles.
 
 - Valid redirect URIs: `https://localhost/api/v1/*`
 - Web origins: `https://localhost/api/v1/`
 
-Save.
-
 #### frcm-react-app-client
 
-Create a new client with Client ID `frcm-react-app-client`.
-
-Leave **Client authentication** off and check the following authentication flows:
-
-- Standard flow
-- Direct access grants
-
-On the next page, set the following:
+Create a client with Client ID `frcm-react-app-client`. Leave **Client authentication** off and check: Standard flow, Direct access grants.
 
 - Valid redirect URIs: `https://localhost/*`
 - Web origins: `https://localhost/`
 
-Save.
-
 #### mqtt-client
 
-Create a new client with Client ID `mqtt-client`.
-
-Turn on **Client authentication** and check the following authentication flows:
-
-- Standard flow
-- Direct access grants
-- Implicit flow
-- Service account roles
-
-No redirect URIs needed. Save.
+Create a client with Client ID `mqtt-client`. Enable **Client authentication** and check: Standard flow, Direct access grants, Implicit flow, Service account roles. No redirect URIs needed.
 
 ### Create roles
 
-Go to **Realm roles** and create the following roles:
+Go to **Realm roles** and create the following roles: `admin` and `developer`.
 
-- `admin`
-- `developer`
-
-The frcm-api checks for the roles `admin`, `developer`, and `default-roles-frcm-realm`, where `default-roles-frcm-realm` is assigned to all users automatically by Keycloak.
+The frcm-api checks for `admin`, `developer`, and `default-roles-frcm-realm`. The `default-roles-frcm-realm` role is assigned to all users automatically by Keycloak.
 
 ### Create users
 
-Go to **Users** and create the users you need. Assign the appropriate roles to each user.
+Go to **Users**, create the users you need, and assign the appropriate roles to each.
 
+---
 
 ## Running the Full Application
 
-The frcm-api runs internally inside its container on port `6767`, as configured in `src/firerisk/api/__init__.py`. This can be changed via the `APP_PORT` environment variable in your `.env` file.
+The frcm-api runs internally on port `6767` as set in `src/firerisk/api/__init__.py`. This can be changed via `APP_PORT` in your `.env` file.
 
-### Start all services
+### 1. Update environment variables
 
-Once Keycloak is configured, uncomment the following in `docker-compose.yml`:
+Update the Keycloak and MQTT variables in your `.env` file, then reload:
+
+```bash
+source ./setup_terminal_env.sh
+```
+
+### 2. Uncomment services in `docker-compose.yml`
 
 ```yaml
 depends_on:
-  - keycloak
-  - frcm-api
-  - frontend
+  keycloak:
+    condition: service_started
+  frcm-api:
+    condition: service_started
+  frontend:
+    condition: service_started
 ```
 
-And uncomment the api and frontend location blocks in `nginx/conf.d/localhost.conf`:
+### 3. Uncomment location blocks in `nginx/conf.d/localhost.conf`
 
 ```nginx
 location /api/v1/ {
@@ -281,18 +253,31 @@ location / {
 }
 ```
 
-Then run:
+### 4. Start all services
 
 ```bash
+docker compose down
 docker compose up -d --build
 ```
 
-### Run the MQTT publisher
+### 5. Verify the application is running
 
-To publish fire risk data to the MQTT broker, run the following command:
+Once all containers are up, the following endpoints should be accessible:
+
+- `https://localhost/auth` - Keycloak
+- `https://localhost/api/v1` - frcm-api
+- `https://localhost/` - Frontend
+
+### 6. Run the MQTT publisher
 
 ```bash
 docker exec firerisk-frcm-api-1 uv run python src/mqtt/frcm_publisher.py --configfile=src/mqtt/connector/config-ada502-pub.yml
 ```
 
 > **Note:** The publisher runs once per execution and then exits. For automated periodic publishing during deployment, this command can be scheduled using cron to run at the desired interval.
+
+---
+
+## Demo
+
+[![Watch the demo](https://drive.google.com/thumbnail?id=1mtzZBOPRZ4B8-WT2dQaLFJuRzOLPUc23)](https://drive.google.com/file/d/1mtzZBOPRZ4B8-WT2dQaLFJuRzOLPUc23/view?usp=sharing)
