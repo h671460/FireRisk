@@ -1,0 +1,19 @@
+# keycloak secrets
+kubectl create secret generic keycloak-secret \
+  --from-literal=KEYCLOAK_ADMIN_PASSWORD=admin \
+  --from-literal=KC_DB_PASSWORD=keycloak \
+  --namespace=group02 \
+  --dry-run=client -o yaml > keycloak/secret.yaml
+kubectl apply -f keycloak/secret.yaml
+kubectl get secret -n group02
+
+
+# service
+$ kubectl create service clusterip keycloak \
+  --tcp=8080:8080 \
+  --namespace=group02 \
+  --dry-run=client -o yaml > keycloak/service.yaml
+
+kubectl port-forward service/keycloak 8080:8080 -n group02
+kubectl get pods -n group02 --watch
+kubectl logs -f deployment/keycloak -n group02

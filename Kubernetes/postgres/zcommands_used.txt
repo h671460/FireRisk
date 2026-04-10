@@ -1,0 +1,51 @@
+# namespace
+kubectl create namespace group02 --dry-run=client -o yaml > namespace.yaml
+kubectl get namespaces
+
+
+# postgres secrets
+kubectl create secret generic postgres-secret \
+  --from-literal=POSTGRES_USER=keycloak \
+  --from-literal=POSTGRES_PASSWORD=keycloak \
+  --from-literal=POSTGRES_DB=keycloak \
+  --namespace=group02 \
+  --dry-run=client -o yaml > postgres/secret.yaml
+
+kubectl get secret -n group02
+
+# configMAP
+kubectl create configmap postgres-config \
+  --from-literal=POSTGRES_USER=keycloak \
+  --from-literal=POSTGRES_DB=keycloak \
+  --namespace=group02 \
+  --dry-run=client -o yaml > postgres/configmap.yaml
+
+kubectl get configmap -n group02
+
+
+# persistentvolumeclaim inside minikube
+kubectl get pvc -n group02
+
+# deployment
+kubectl create deployment postgres \
+  --image=postgres:17 \
+  --namespace=group02 \
+  --dry-run=client -o yaml > postgres/statefulset.yaml
+
+kubectl get statefulset -n group02
+kubectl get pods  -n group02
+kubectl get pvc  -n group02
+
+
+# services
+kubectl create service clusterip postgres \
+  --tcp=5432:5432 \
+  --namespace=group02 \
+  --dry-run=client -o yaml > postgres/service.yaml
+
+kubectl get service -n group02
+kubectl port-forward service/postgres 5433:5432 -n group02
+kubectl rollout restart statefulset postgres -n group02
+kubectl exec -it postgres-0 -n group02 -- psql -U keycloak -d keycloak
+SELECT * FROM test_user;
+

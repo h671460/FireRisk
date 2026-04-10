@@ -1,0 +1,12 @@
+# namespace
+kubectl create namespace group02 --dry-run=client -o yaml > namespace.yaml
+kubectl get namespaces
+
+
+
+Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "192.168.49.2`tfirerisk.local"
+notepad "C:\Windows\System32\drivers\etc\hosts"
+# End of section
+127.0.0.1    group2.local
+
+kubectl apply -f ingress.yaml

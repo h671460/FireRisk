@@ -32,9 +32,6 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_PROXY: edge
 
-
-      KC_HOSTNAME: ${KC_HOSTNAME}
-      KC_HOSTNAME_ADMIN: ${KC_HOSTNAME_ADMIN}
       KC_HOSTNAME_STRICT: "false"
 
       KC_HTTP_RELATIVE_PATH: /auth
@@ -118,10 +115,10 @@ services:
     depends_on:
       keycloak:
         condition: service_started
-      frcm-api:
-        condition: service_started
-      frontend:
-        condition: service_started
+      # frcm-api:
+      #   condition: service_started
+      # frontend:
+      #   condition: service_started
     restart: unless-stopped
 
 
@@ -148,4 +145,3 @@ volumes:
 networks:
   default:
     driver: bridge
-

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config
+  namespace: group02
+data:
+  KEYCLOAK_ADMIN: admin
+  KC_DB: postgres
+  KC_DB_URL_HOST: postgres.group02.svc.cluster.local
+  KC_DB_URL_PORT: "5432"
+  KC_DB_URL_DATABASE: keycloak
+  KC_DB_USERNAME: keycloak
+  KC_PROXY_HEADERS: xforwarded
+  KC_HTTP_ENABLED: "true"
+  KC_PROXY: edge
+  # KC_HOSTNAME: http://group02.local
+  # KC_HOSTNAME_ADMIN: http://group02.local
+  KC_HOSTNAME_STRICT: "false"
+  KC_HTTP_RELATIVE_PATH: /auth
