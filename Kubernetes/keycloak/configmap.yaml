@@ -13,7 +13,5 @@ data:
   KC_PROXY_HEADERS: xforwarded
   KC_HTTP_ENABLED: "true"
   KC_PROXY: edge
-  # KC_HOSTNAME: http://group02.local
-  # KC_HOSTNAME_ADMIN: http://group02.local
   KC_HOSTNAME_STRICT: "false"
   KC_HTTP_RELATIVE_PATH: /auth

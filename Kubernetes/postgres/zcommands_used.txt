@@ -48,4 +48,6 @@ kubectl port-forward service/postgres 5433:5432 -n group02
 kubectl rollout restart statefulset postgres -n group02
 kubectl exec -it postgres-0 -n group02 -- psql -U keycloak -d keycloak
 SELECT * FROM test_user;
+kubectl logs -n group02 pod/postgres-0
+
 

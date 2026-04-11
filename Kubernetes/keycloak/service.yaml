@@ -7,5 +7,6 @@ spec:
   selector:
     app: keycloak
   ports:
-    - port: 8080
+    - port: 8888
       targetPort: 8080
+  type: ClusterIP

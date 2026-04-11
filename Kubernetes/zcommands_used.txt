@@ -6,7 +6,14 @@ kubectl get namespaces
 
 Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "192.168.49.2`tfirerisk.local"
 notepad "C:\Windows\System32\drivers\etc\hosts"
+cat /c/Windows/System32/drivers/etc/hosts
 # End of section
-127.0.0.1    group2.local
+127.0.0.1    group02.local
 
 kubectl apply -f ingress.yaml
+kubectl get ingress -n group02
+
+kubectl get service -n group02
+
+
+
