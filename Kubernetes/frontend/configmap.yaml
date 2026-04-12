@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  REACT_APP_API: http://group02.local/api/v1
+  REACT_APP_KEYCLOAK_CLIENT_ID: frcm-frontend-client
+  REACT_APP_KEYCLOAK_REALM: frcm-realm
+  REACT_APP_KEYCLOAK_URL: http://group02.local/auth/
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: group02

@@ -30,8 +30,8 @@ kubectl rollout restart deployment/frcm-api -n group02
 # secret
 kubectl create secret generic frcm-api-secret \
   --from-literal=CLIENT_SECRET="4cz6S0J5PjNMJYINfWCQtcvVdDb47C8r" \
-  --from-literal=MET_CLIENT_ID=4b2da67b-2486-4b08-9f87-a6c09ce42d82 \
-  --from-literal=MET_CLIENT_SECRET=5f9d7c61-82ad-43f6-b45e-8af05126e14f \
+  --from-literal=MET_CLIENT_ID="ec9f0d56-bc49-46b6-8146-8d18b643c8ab" \
+  --from-literal=MET_CLIENT_SECRET="697e336b-fa7d-4e8e-9413-a79a2b330d1d" \
   --from-literal=TIMESCALE_PASSWORD=timescale \
   --namespace=group02 \
   --dry-run=client -o yaml > frcm-api/secret.yaml
@@ -55,4 +55,9 @@ kubectl apply -f frcm-api/secret.yaml
 kubectl apply -f frcm-api/deployment.yaml
 kubectl apply -f frcm-api/service.yaml
 kubectl get pods -n group02 -w
+
+
+
+kubectl logs -f deployment/frcm-api -n group02
+
 

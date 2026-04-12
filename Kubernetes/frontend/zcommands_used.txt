@@ -1,0 +1,59 @@
+# frcm-api
+# create image and publish to dockerhub
+docker build -t yosafefesahaoqbamecail/frcm-frontend:latest -f Dockerfile.frontend .
+docker push yosafefesahaoqbamecail/frcm-frontend:latest
+
+# configmap
+kubectl create configmap frontend-config \
+  --from-literal=REACT_APP_KEYCLOAK_URL=http://group02.local/auth/ \
+  --from-literal=REACT_APP_KEYCLOAK_REALM=frcm-realm \
+  --from-literal=REACT_APP_KEYCLOAK_CLIENT_ID=frcm-frontend-client \
+  --from-literal=REACT_APP_API=http://group02.local/api/v1 \
+  --namespace=group02 \
+  --dry-run=client -o yaml > frontend/configmap.yaml
+
+kubectl apply -f frontend/configmap.yaml
+kubectl get configmap -n group02
+
+
+
+
+# secret
+
+
+
+
+
+
+
+# deployment
+kubectl create deployment frontend \
+  --image=yosafefesahaoqbamecail/frcm-frontend:latest \
+  --namespace=group02 \
+  --dry-run=client -o yaml > frontend/deployment.yaml
+
+
+
+
+
+# service
+kubectl create service clusterip frontend \
+  --tcp=3000:80 \
+  --namespace=group02 \
+  --dry-run=client -o yaml > frontend/service.yaml
+
+
+
+
+
+# apply
+kubectl apply -f frontend/configmap.yaml
+kubectl apply -f frontend/deployment.yaml
+kubectl apply -f frontend/service.yaml
+kubectl get pods -n group02 -w
+
+kubectl rollout restart deployment/frontend -n group02
+kubectl get pods -n group02 -w
+
+kubectl logs -f deployment/frontend -n group02
+

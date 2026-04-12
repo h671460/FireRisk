@@ -23,4 +23,12 @@ spec:
                 name: frcm-api
                 port:
                   number: 6767
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000
+                  
                   
