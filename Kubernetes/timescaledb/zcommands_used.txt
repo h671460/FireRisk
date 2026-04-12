@@ -1,0 +1,51 @@
+# timescaledb
+# configmap
+kubectl create configmap timescaledb-config \
+  --from-literal=POSTGRES_USER=timescale \
+  --from-literal=POSTGRES_DB=timescaledb \
+  --from-literal=POSTGRES_PORT="5432" \
+  --namespace=group02 \
+  --dry-run=client -o yaml > timescaledb/configmap.yaml
+
+kubectl apply -f timescaledb/configmap-init.yaml
+kubectl get configmap -n group02
+
+# timescaledb init file
+tr -d '\r' < ../init-timescaledb/01-setup.sql > /tmp/01-setup.sql
+kubectl create configmap timescaledb-init \
+  --from-file=01-setup.sql=/tmp/01-setup.sql \
+  --namespace=group02 \
+  --dry-run=client -o yaml > timescaledb/configmap-init.yaml
+kubectl apply -f timescaledb/configmap-init.yaml
+kubectl get configmap -n group02
+
+
+# secrets
+kubectl create secret generic timescaledb-secret \
+  --from-literal=POSTGRES_PASSWORD=timescale \
+  --namespace=group02 \
+  --dry-run=client -o yaml > timescaledb/secret.yaml
+
+
+# deployment X, statefulset 
+kubectl create deployment timescaledb  \
+  --image=timescale/timescaledb:latest-pg16  \
+  --namespace=group02 --dry-run=client   \
+  -o yaml > timescaledb/statefulset.yaml
+
+kubectl apply -f timescaledb/statefulset.yaml
+kubectl get pods -n group02 -w
+
+# service
+kubectl create service clusterip timescaledb \
+  --tcp=5432:5432 \
+  --namespace=group02 \
+  --dry-run=client -o yaml > timescaledb/service.yaml
+
+
+kubectl apply -f timescaledb/configmap.yaml
+kubectl apply -f timescaledb/configmap-init.yaml
+kubectl apply -f timescaledb/secret.yaml
+kubectl apply -f timescaledb/service.yaml
+kubectl apply -f timescaledb/statefulset.yaml
+kubectl get pods -n group02 -w

@@ -1,0 +1,58 @@
+# frcm-api
+# create image and publish to dockerhub
+
+docker build -t yosafefesahaoqbamecail/frcm-api:latest -f Dockerfile.api .
+docker push yosafefesahaoqbamecail/frcm-api:latest
+
+
+# cinfigmap
+kubectl delete configmap frcm-api-config -n group02
+
+kubectl create configmap frcm-api-config \
+  --from-literal=APP_HOST=0.0.0.0 \
+  --from-literal=APP_PORT="6767" \
+  --from-literal=REALM=frcm-realm \
+  --from-literal=CLIENT_ID=frcm-api-client \
+  --from-literal=TIMESCALE_HOST=timescaledb.group02.svc.cluster.local \
+  --from-literal=TIMESCALE_PORT="5432" \
+  --from-literal=TIMESCALE_DATABASE=timescaledb \
+  --from-literal=TIMESCALE_USER=timescale \
+  --from-literal=TIMESCALE_SCHEMA=public \
+  --from-literal=KEYCLOAK_PUBLIC_URL=http://group02.local/auth/ \
+  --from-literal=KEYCLOAK_INTERNAL_URL=http://keycloak.group02.svc.cluster.local:8888/auth/ \
+  --namespace=group02 \
+  --dry-run=client -o yaml > frcm-api/configmap.yaml
+
+kubectl apply -f frcm-api/configmap.yaml
+kubectl rollout restart deployment/frcm-api -n group02
+
+
+# secret
+kubectl create secret generic frcm-api-secret \
+  --from-literal=CLIENT_SECRET="4cz6S0J5PjNMJYINfWCQtcvVdDb47C8r" \
+  --from-literal=MET_CLIENT_ID=4b2da67b-2486-4b08-9f87-a6c09ce42d82 \
+  --from-literal=MET_CLIENT_SECRET=5f9d7c61-82ad-43f6-b45e-8af05126e14f \
+  --from-literal=TIMESCALE_PASSWORD=timescale \
+  --namespace=group02 \
+  --dry-run=client -o yaml > frcm-api/secret.yaml
+
+
+# deployment
+kubectl create deployment frcm-api \
+  --image=yosafefesahaoqbamecail/frcm-api:latest \
+  --namespace=group02 \
+  --dry-run=client -o yaml > frcm-api/deployment.yaml
+
+# service
+kubectl create service clusterip frcm-api \
+  --tcp=6767:6767 \
+  --namespace=group02 \
+  --dry-run=client -o yaml > frcm-api/service.yaml
+
+# apply
+kubectl apply -f frcm-api/configmap.yaml
+kubectl apply -f frcm-api/secret.yaml
+kubectl apply -f frcm-api/deployment.yaml
+kubectl apply -f frcm-api/service.yaml
+kubectl get pods -n group02 -w
+

@@ -16,4 +16,5 @@ $ kubectl create service clusterip keycloak \
 
 kubectl port-forward service/keycloak 8080:8080 -n group02
 kubectl get pods -n group02 --watch
+kubectl rollout restart deployment/keycloak -n group02
 kubectl logs -f deployment/keycloak -n group02

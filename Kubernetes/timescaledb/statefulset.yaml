@@ -1,47 +1,53 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: postgres
+  name: timescaledb
   namespace: group02
 spec:
-  serviceName: postgres
+  serviceName: timescaledb
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: timescaledb
   template:
     metadata:
       labels:
-        app: postgres
+        app: timescaledb
     spec:
       containers:
-        - name: postgres
-          image: postgres:17
+        - name: timescaledb
+          image: timescale/timescaledb:latest-pg16
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
           env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_PASSWORD
             - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
-                  name: postgres-config
+                  name: timescaledb-config
                   key: POSTGRES_USER
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
-                  name: postgres-config
+                  name: timescaledb-config
                   key: POSTGRES_DB
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: timescaledb-secret
+                  key: POSTGRES_PASSWORD
           volumeMounts:
-            - name: postgres-data
+            - name: timescaledb-data
               mountPath: /var/lib/postgresql/data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: timescaledb-init
   volumeClaimTemplates:
     - metadata:
-        name: postgres-data
+        name: timescaledb-data
       spec:
         accessModes:
           - ReadWriteOnce

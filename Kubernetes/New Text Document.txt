@@ -1,0 +1,51 @@
+kubectl config get-contexts
+kubectl create deployment app --image=image:latest --dry-run client -o yaml
+kubectl logs pod_name
+kubectl exec -it pod_name -- bash
+kubectl port-forward pod_name 8000:80
+kubectl expose deployment app --port 8000 target 80 --name app-svc --dry-run client -o yaml --type=CluusterIP
+kubectl get services
+kubectl create secret generic dbpass --from-literal=password=12345
+kubectl get secret dbpass  
+kubectl get secret dbpass -o yaml 
+
+
+
+kubectl get ingress
+kubectl get ingress my-ingress -o wide
+kubectl get ingress my-ingress -o yaml
+
+kubectl create configmap something --from-literal=key=value
+kubectl create configmap html-content --from-file=key=index.html
+# mount
+kubectl get configmap 
+kubectl get configmap  html-content -o yaml
+key=index.html
+
+# volunmes
+
+volumeMounts:
+	- mountpath: /usr/share/nginx/html
+	  name: static-content
+
+volumes:
+	-name: static-content
+	configMap:
+		name: html-content
+
+kubectl rollout restart deployment deploymen_name
+
+
+https://ada502-fireguard.live/
+
+
+# postgres
+kubectl create deployment keycloak_db --image=postgres:17 --dry-run=client -o yaml > Kubernetes/keycloak_db.ks8.yaml
+
+
+kubectl descrive pod pod_name
+
+
+kubectl port-forward service/db 5432:5432
+
+ssh -L 5432:localhost:5432 ubuntu@ip -t nrec.pem 

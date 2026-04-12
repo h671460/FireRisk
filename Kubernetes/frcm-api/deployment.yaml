@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frcm-api
+  namespace: group02
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frcm-api
+  template:
+    metadata:
+      labels:
+        app: frcm-api
+    spec:
+      containers:
+        - name: frcm-api
+          image: yosafefesahaoqbamecail/frcm-api:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: frcm-api-config
+            - secretRef:
+                name: frcm-api-secret

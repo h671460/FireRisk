@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: firerisk-ingress
   namespace: group02
-  # annotations:
-  #   nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
@@ -18,4 +16,11 @@ spec:
                 name: keycloak
                 port:
                   number: 8888
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: frcm-api
+                port:
+                  number: 6767
                   
