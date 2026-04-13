@@ -1,14 +1,14 @@
 from fastapi import status
 
 
-from tests.test_src.test_firerisk.api.user_utils import (
+from tests.test_src.test_firerisk.test_api.user_utils import (
     client,
     app,
     override_get_user_info_admin,
     override_get_user_info_no_roles,
 )
 
-from tests.test_src.test_firerisk.api.db_utils import test_fire_risk
+from tests.test_src.test_firerisk.test_api.db_utils import test_fire_risk
 from src.firerisk.api.routers.auth import get_user_info
 
 

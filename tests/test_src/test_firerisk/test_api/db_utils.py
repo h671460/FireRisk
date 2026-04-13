@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 
 from src.firerisk.databases.timescale.database import TIMESCALE_Base
-from tests.test_src.test_firerisk.api.user_utils import app
+from tests.test_src.test_firerisk.test_api.user_utils import app
 from src.firerisk.api.routers.frcm_route import get_db
 from src.firerisk.databases.timescale.models import FireRisk
 from pathlib import Path
