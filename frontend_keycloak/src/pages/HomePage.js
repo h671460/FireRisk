@@ -33,12 +33,11 @@ export default function HomePage() {
     <div className="page-container">
       <section className="hero">
         <h1>Fire Risk Forecast</h1>
-        <p>
-          This application provides fire risk forecasts based on longitude,
-          latitude, and a selected time range. Log in with Keycloak to access
-          the forecast computation page.
-        </p>
-
+          <p>
+            This application provides fire risk forecasts based on a place name
+            and a selected time range. The frontend resolves the place name to
+            coordinates before requesting the forecast from the backend.
+          </p>
         <div className="hero-actions">
           {!isAuthed ? (
             <button className="primary-btn" onClick={handleLogin}>
