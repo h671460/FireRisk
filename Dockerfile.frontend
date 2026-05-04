@@ -7,10 +7,6 @@ RUN npm install
 
 COPY frontend_keycloak/ .
 
-ENV REACT_APP_KEYCLOAK_URL=http://group02.local/auth/
-ENV REACT_APP_KEYCLOAK_REALM=frcm-realm
-ENV REACT_APP_KEYCLOAK_CLIENT_ID=frcm-react-app-client
-ENV REACT_APP_API=http://group02.local/api/v1
 
 RUN npm run build
 

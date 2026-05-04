@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API || "http://127.0.0.1:6767";
+const API_BASE = "https://fireriskgroup02.com/api/v1";
 
 // Generic fetch that includes Bearer token and parses JSON/text
 export async function apiFetch(path, { method = "GET", token, body } = {}) {
