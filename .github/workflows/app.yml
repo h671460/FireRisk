@@ -168,11 +168,14 @@ jobs:
 
     - name: build frcm-api and publish to dockerhub
       run: |
-        docker build -f Dockerfile.api -t yosafefesahaoqbamecail/frcm-api:latest .
-        docker push yosafefesahaoqbamecail/frcm-api:latest
-    - name: build frontend and publish to dockerhub
+        docker build -f Dockerfile.api -t ${{ secrets.DOCKERHUB_USERNAME }}/frcm-api:latest .
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/frcm-api:latest
+
+    - name: build frcm-frontend and publish to dockerhub
       run: |
-        echo "Building frontend..."
+        docker build -f Dockerfile.frontend -t ${{ secrets.DOCKERHUB_USERNAME }}/frcm-frontend:latest .
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/frcm-frontend:latest
+
 
   deploy:
     runs-on: ubuntu-latest
