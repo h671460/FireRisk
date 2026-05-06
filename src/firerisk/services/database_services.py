@@ -2,15 +2,25 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 import datetime as dt
-
+from fastapi.encoders import jsonable_encoder
 
 from src.firerisk.databases.timescale.models import FireRisk
+
+
+import math
+
+def sanitize_record(record: dict) -> dict:
+    return {
+        k: (None if isinstance(v, float) and math.isnan(v) else v)
+        for k, v in record.items()
+    }
 
 # test query, db'slast 100 records in descending order
 def frcm_db_read_last_100(db: Session):
     try:
         res = db.query(FireRisk).order_by(FireRisk.time.desc()).limit(100).all()
-        return res
+        encoded = jsonable_encoder(res)
+        return [sanitize_record(r) for r in encoded]
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -69,7 +79,7 @@ def frcm_db_get_range(
     lon: float,
     start_time: dt.datetime,
     end_time: dt.datetime,
-) -> list[FireRisk]:
+):
     try:
         if start_time.tzinfo is None:
             start_time = start_time.replace(tzinfo=dt.timezone.utc)
@@ -83,7 +93,7 @@ def frcm_db_get_range(
         # AND time >= start_time
         # AND time <= end_time
         # ORDER BY time ASC;
-        return (
+        res=  (
             db.query(FireRisk)
             .filter(
                 and_(
@@ -96,6 +106,8 @@ def frcm_db_get_range(
             .order_by(FireRisk.time.asc())
             .all()
         )
+        encoded = jsonable_encoder(res)
+        return [sanitize_record(r) for r in encoded]    
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -103,9 +115,14 @@ def frcm_db_get_range(
         )
 
 
+
 def frcm_db_save(db: Session, records: list[FireRisk]) -> None:
     try:
         for record in records:
+            for column in record.__table__.columns:
+                val = getattr(record, column.name)
+                if isinstance(val, float) and math.isnan(val):
+                    setattr(record, column.name, None)
             db.add(record)
         db.commit()
     except Exception as e:
