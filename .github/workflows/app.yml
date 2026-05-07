@@ -173,4 +173,6 @@ jobs:
         username: ${{ secrets.VM_USER }}
         key: ${{ secrets.VM_SSH_KEY }}
         script: |
-          kubectl rollout restart deployment/frcm-api -n group2
+          kubectl delete deployment frcm-api -n group2
+          kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/deployment.yaml
+          kubectl wait --for=condition=ready pod -l app=frcm-api -n group2 --timeout=120s
