@@ -64,10 +64,10 @@ jobs:
         export PYTHONPATH=$(pwd)
         uv run pytest -vs tests/test_src/test_firerisk/test_api/test_route/test_user.py
 
-    # - name: Test with pytest test_auth
-    #   run: |
-    #     export PYTHONPATH=$(pwd)
-    #     uv run pytest -vs tests/test_src/test_firerisk/test_api/test_auth.py
+    - name: Test with pytest test_auth
+      run: |
+        export PYTHONPATH=$(pwd)
+        uv run pytest -vs tests/test_src/test_firerisk/test_api/test_auth.py
 
   integration_tests:
     runs-on: ubuntu-latest
@@ -185,7 +185,5 @@ jobs:
           kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/configmap.yaml
           kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/deployment.yaml
           kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/secret.yaml
-
-          sleep 30
           kubectl get pods -n group2
           kubectl wait --for=condition=ready pod -l app=frcm-api -n group2 --timeout=180s
