@@ -174,4 +174,3 @@ jobs:
         key: ${{ secrets.VM_SSH_KEY }}
         script: |
           kubectl rollout restart deployment/frcm-api -n group2
-          kubectl rollout restart deployment/frcm-frontend -n group2
