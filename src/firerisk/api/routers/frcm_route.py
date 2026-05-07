@@ -65,13 +65,12 @@ example_end_str = "2026-03-28T22:00:00Z"
 @router.get("/range", status_code=status.HTTP_200_OK)
 async def read_frcm_with_time_range(
     db: DB,
-    # lon: float = Query(..., description="Longitude of the location", example=5.3327),
-    # lat: float = Query(..., description="Latitude of the location", example=60.383),
-    # start_time: datetime = Query(..., description="Start time (ISO 8601)", example=example_start_str),
-    # end_time: datetime = Query(..., description="End time (ISO 8601)", example=example_end_str),
-    lon, lat, start_time: datetime,end_time: datetime ,
+    lon: float = Query(..., description="Longitude of the location", openapi_examples={"default": {"value": 10.3951}}),
+    lat: float = Query(..., description="Latitude of the location", openapi_examples={"default": {"value": 63.4305}}),
+    start_time: datetime = Query(..., description="Start time (ISO 8601)", openapi_examples={"default": {"value": example_start_str}}),
+    end_time: datetime = Query(..., description="End time (ISO 8601)", openapi_examples={"default": {"value": example_end_str}}),
     user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
-):  
+):
     
     if lon is None or lat is None or start_time is None or end_time is None:
         raise HTTPException(
