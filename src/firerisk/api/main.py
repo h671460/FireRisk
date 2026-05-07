@@ -43,7 +43,7 @@ def health_check():
 
 @app.get("/healthy2")
 def another_health_check():
-    return {'status': 'Healthy88'}
+    return {'status': 'Healthy66'}
 
 app.include_router(frcm_route.router)
 app.include_router(user.router)

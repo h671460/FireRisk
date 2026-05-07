@@ -178,11 +178,4 @@ jobs:
         username: ${{ secrets.VM_USER }}
         key: ${{ secrets.VM_SSH_KEY }}
         script: |
-          kubectl delete deployment frcm-api -n group2 --ignore-not-found
-          kubectl delete replicaset -n group2 -l app=frcm-api --ignore-not-found
-          kubectl delete pod -n group2 -l app=frcm-api --force --grace-period=0 --ignore-not-found
-          kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/secret.yaml
-          kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/configmap.yaml
-          kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/deployment.yaml
-          kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/secret.yaml
-          kubectl get pods -n group2
+          kubectl rollout restart deployment/frcm-api -n group2
