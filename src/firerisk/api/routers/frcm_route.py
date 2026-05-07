@@ -59,14 +59,14 @@ async def read_last_100(
 
 
 
-example_start_str = "2026-03-27T12:00:00Z"
-example_end_str = "2026-03-28T22:00:00Z"
+example_start_str = "2026-03-04T12:00:00Z"
+example_end_str = "2026-03-10T22:00:00Z"
 
 @router.get("/range", status_code=status.HTTP_200_OK)
 async def read_frcm_with_time_range(
     db: DB,
-    lon: float = Query(..., description="Longitude of the location", openapi_examples={"default": {"value": 10.3951}}),
-    lat: float = Query(..., description="Latitude of the location", openapi_examples={"default": {"value": 63.4305}}),
+    lon: float = Query(..., description="Longitude of the location", openapi_examples={"default": {"value": 8.53136}}),
+    lat: float = Query(..., description="Latitude of the location", openapi_examples={"default": {"value": 63.26798}}),
     start_time: datetime = Query(..., description="Start time (ISO 8601)", openapi_examples={"default": {"value": example_start_str}}),
     end_time: datetime = Query(..., description="End time (ISO 8601)", openapi_examples={"default": {"value": example_end_str}}),
     user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
