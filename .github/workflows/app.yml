@@ -186,4 +186,3 @@ jobs:
           kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/deployment.yaml
           kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/secret.yaml
           kubectl get pods -n group2
-          kubectl wait --for=condition=ready pod -l app=frcm-api -n group2 --timeout=180s
