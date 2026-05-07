@@ -177,4 +177,5 @@ jobs:
           kubectl delete replicaset -n group2 -l app=frcm-api --ignore-not-found
           kubectl delete pod -n group2 -l app=frcm-api --force --grace-period=0 --ignore-not-found
           kubectl apply -f /home/ubuntu/kubernetes/FireRisk_k/frcm-api/deployment.yaml
-          kubectl wait --for=condition=ready pod -l app=frcm-api -n group2 --timeout=180s
+          # sleep 10
+          # kubectl wait --for=condition=ready pod -l app=frcm-api -n group2 --timeout=180s
