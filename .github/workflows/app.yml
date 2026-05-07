@@ -180,3 +180,5 @@ jobs:
         script: |
           kubectl rollout restart deployment/frcm-api -n group2
           kubectl rollout restart deployment/frontend -n group2
+          kubectl rollout status deployment/frcm-api -n group2 --timeout=120s
+          kubectl rollout status deployment/frontend -n group2 --timeout=120s 
