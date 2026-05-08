@@ -36,10 +36,12 @@ services:
 
       KC_HTTP_RELATIVE_PATH: /auth
 
-    command: ["start-dev"]
+    volumes:
+      - ./keycloak-export:/opt/keycloak/data/import
+
+    command: ["start-dev", "--import-realm"]
     depends_on:
       - postgres
-
 
     
 
@@ -121,17 +123,6 @@ services:
         condition: service_started
     restart: unless-stopped
 
-
-  mqtt-publisher:
-      build:
-        context: .
-        dockerfile: Dockerfile.mqtt
-      depends_on:
-        nginx:
-          condition: service_started
-      restart: unless-stopped
-      env_file:
-        - .env
 
 
 
