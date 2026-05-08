@@ -192,7 +192,3 @@ docker exec firerisk-frcm-api-1 uv run python src/mqtt/frcm_publisher.py --confi
 > **Note:** The publisher runs once per execution and then exits. It can be scheduled using cron to run at a desired interval.
 
 ---
-
-## Demo
-
-[![Watch the demo](https://drive.google.com/thumbnail?id=1mtzZBOPRZ4B8-WT2dQaLFJuRzOLPUc23)](https://drive.google.com/file/d/1mtzZBOPRZ4B8-WT2dQaLFJuRzOLPUc23/view?usp=sharing)
