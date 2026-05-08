@@ -3,8 +3,6 @@ name: app_workflow
 on:
   push:
     branches: [ "main","ci-build" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
 
 env:
