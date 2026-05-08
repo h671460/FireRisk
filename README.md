@@ -2,6 +2,42 @@
 
 FireRisk is a Python-based project for fire risk prediction.
 
+## Architecture
+
+![FireRisk Architecture](images/FireRisk%20-%20Architecture%20Sprint%205.svg)
+
+FireRisk follows a microservices architecture with all external traffic routed through nginx as a reverse proxy.
+
+### nginx
+
+nginx is the single entry point for all external traffic, routing requests to the appropriate services:
+- `https://localhost/` - serves the frontend client
+- `https://localhost/auth` - proxies to Keycloak for authentication
+- `https://localhost/api/v1` - proxies to the frcm-api backend
+
+SSL termination is handled at the nginx layer using self-signed certificates for local development.
+
+### Keycloak
+
+Keycloak handles authentication and authorization. It manages two realms: `master_realm` for admin access and `frcm_realm` for application users. User data is persisted in a dedicated PostgreSQL database.
+
+### frcm-api
+
+The core backend service exposing a REST API. It is internally organized into three services:
+- `database service` - reads and writes fire risk records to TimescaleDB
+- `frcm service` - orchestrates fire risk computation using the dynamic-frcm library
+
+### TimescaleDB
+
+Stores all computed fire risk records as time series data, optimized for time-based queries.
+
+### MQTT Publisher
+
+A Python script that fetches fire risk predictions and publishes them to an external MQTT broker. External client dashboards can subscribe to these topics via a subscriber/forwarder to receive live fire risk updates.
+
+The script can be run manually or scheduled using cron to execute at a desired interval.
+---
+
 ## Prerequisites
 
 - Docker Desktop installed and running on your machine
