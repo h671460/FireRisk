@@ -10,7 +10,7 @@ from src.firerisk.databases.timescale.models import FireRisk
 
 UTC = dt.timezone.utc
 
-frc = METFireRiskAPI()
+frcmAPI = METFireRiskAPI()
 
 
 def utc_now() -> dt.datetime:
@@ -42,6 +42,9 @@ def get_fire_risk_with_time_range(
     start_time: dt.datetime,
     end_time: dt.datetime,
 ) -> List[FireRisk]:
+    
+    start_time = start_time - dt.timedelta(days=2)
+    end_time = end_time + dt.timedelta(days=2)
 
     start_utc = to_utc(start_time)
     end_utc = to_utc(end_time)
@@ -52,7 +55,7 @@ def get_fire_risk_with_time_range(
     now_utc = dt.datetime.now(tz=UTC)
     obs_delta = now_utc - start_utc
 
-    wd: WeatherData = frc.get_weatherdata_now(location, obs_delta)
+    wd: WeatherData = frcmAPI.get_weatherdata_now(location, obs_delta)
 
     # Filter weather points
     weather_points: Dict[dt.datetime, Dict] = {}
@@ -77,7 +80,7 @@ def get_fire_risk_with_time_range(
         ),
     })
 
-    pred: FireRiskPrediction = frc.compute(wd_in_range)
+    pred: FireRiskPrediction = frcmAPI.compute(wd_in_range)
     pred_map = _prediction_map(pred)
 
     results: List[FireRisk] = []
