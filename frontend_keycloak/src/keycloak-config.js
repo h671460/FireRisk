@@ -10,11 +10,6 @@ const initOptions = {
     clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID || "frcm-react-app-client",
 };
 
-// const initOptions = {
-//     url: "https://fireriskgroup02.com/auth/",
-//     realm: "frcm-realm",
-//     clientId: "frcm-react-app-client",
-// };
 
 console.log("Keycloak Init Options:", initOptions); // Debugging line to check the config values
 

@@ -160,7 +160,7 @@ jobs:
 
     - name: build frcm-frontend and publish to dockerhub
       run: |
-        docker build -f Dockerfile.frontend -t ${{ secrets.DOCKERHUB_USERNAME }}/frcm-frontend:latest .
+        docker build -f Dockerfile.frontend-deployment -t ${{ secrets.DOCKERHUB_USERNAME }}/frcm-frontend:latest .
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/frcm-frontend:latest
 
 
