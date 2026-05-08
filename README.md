@@ -169,6 +169,14 @@ Once all containers are up, the following endpoints should be accessible:
 
 > **Note:** Keycloak may take a minute or two to fully start up. If the page does not load immediately, wait and refresh.
 
+To follow the Keycloak startup logs:
+
+```bash
+docker compose logs -f keycloak
+```
+
+Wait until you see `http://0.0.0.0:8080` in the logs before proceeding, then press `CTRL+C` to exit the logs.
+
 ### 6. Default credentials
 
 The following user is available out of the box:
