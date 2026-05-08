@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -59,19 +59,18 @@ async def read_last_100(
 
 
 
-example_start_str = "2026-03-27T12:00:00Z"
-example_end_str = "2026-03-28T22:00:00Z"
+example_start_str = "2026-03-04T12:00:00Z"
+example_end_str = "2026-03-10T22:00:00Z"
 
 @router.get("/range", status_code=status.HTTP_200_OK)
 async def read_frcm_with_time_range(
     db: DB,
-    # lon: float = Query(..., description="Longitude of the location", example=5.3327),
-    # lat: float = Query(..., description="Latitude of the location", example=60.383),
-    # start_time: datetime = Query(..., description="Start time (ISO 8601)", example=example_start_str),
-    # end_time: datetime = Query(..., description="End time (ISO 8601)", example=example_end_str),
-    lon, lat, start_time: datetime,end_time: datetime ,
+    lon: float = Query(..., description="Longitude of the location", openapi_examples={"default": {"value": 8.53136}}),
+    lat: float = Query(..., description="Latitude of the location", openapi_examples={"default": {"value": 63.26798}}),
+    start_time: datetime = Query(..., description="Start time (ISO 8601)", openapi_examples={"default": {"value": example_start_str}}),
+    end_time: datetime = Query(..., description="End time (ISO 8601)", openapi_examples={"default": {"value": example_end_str}}),
     user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
-):  
+):
     
     if lon is None or lat is None or start_time is None or end_time is None:
         raise HTTPException(
@@ -83,6 +82,42 @@ async def read_frcm_with_time_range(
         
     exists = frcm_db_check_range(db, lat, lon, start_time, end_time)
 
+    if exists:
+        return frcm_db_get_range(db, lat, lon, start_time, end_time)
+
+    try:
+        records = get_fire_risk_with_time_range(location, start_time, end_time)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to fetch fire risk data from frcm service"
+        )
+
+    frcm_db_save(db, records)
+    return frcm_db_get_range(db, lat, lon, start_time, end_time)
+
+
+
+@router.get("/predict", status_code=status.HTTP_200_OK)
+async def predict_days(
+    db: DB,
+    lon: float = Query(..., description="Longitude of the location", openapi_examples={"default": {"value": 8.53136}}),
+    lat: float = Query(..., description="Latitude of the location", openapi_examples={"default": {"value": 63.26798}}),
+    days: int = Query(..., description="Number of days to predict from today", openapi_examples={"default": {"value": 3}}),
+    user: userPayload = Depends(has_roles(["default-roles-frcm-realm"])),
+):
+    if days < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="days must be at least 1"
+        )
+
+    start_time = datetime.now(tz=timezone.utc)
+    end_time = start_time + timedelta(days=days)
+
+    location = Location(latitude=lat, longitude=lon)
+
+    exists = frcm_db_check_range(db, lat, lon, start_time, end_time)
     if exists:
         return frcm_db_get_range(db, lat, lon, start_time, end_time)
 

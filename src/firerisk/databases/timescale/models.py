@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import DateTime, Float, String, Index, func
 from sqlalchemy.orm import Mapped, mapped_column
 from src.firerisk.databases.timescale.database import TIMESCALE_Base
@@ -12,12 +13,12 @@ class FireRisk(TIMESCALE_Base):
     lat: Mapped[float] = mapped_column(Float, nullable=False)
     lon: Mapped[float] = mapped_column(Float, nullable=False)
 
-    temperature: Mapped[float] = mapped_column(Float, nullable=False)
-    humidity: Mapped[float] = mapped_column(Float, nullable=False)
-    wind_speed: Mapped[float] = mapped_column(Float, nullable=False)
+    temperature: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    humidity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    wind_speed: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
-    risk_score: Mapped[float] = mapped_column(Float, nullable=False)
-    risk_level: Mapped[str] = mapped_column(String, nullable=False)
+    risk_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    risk_level: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -33,7 +34,7 @@ class FireRisk(TIMESCALE_Base):
             f"humidity={self.humidity:.1f}%, "
             f"wind_speed={self.wind_speed:.1f} m/s, "
             f"risk_score={self.risk_score:.2f}, "
-            f"risk_level='{self.risk_level}'",
+            f"risk_level='{self.risk_level}', "
             f"created_at={self.created_at.isoformat()}"
             f")"
         )

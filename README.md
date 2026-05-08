@@ -2,6 +2,46 @@
 
 FireRisk is a Python-based project for fire risk prediction.
 
+## Architecture
+
+![FireRisk Architecture](images/FireRisk%20-%20Architecture%20Sprint%205.svg)
+
+FireRisk follows a microservices architecture with all external traffic routed through nginx as a reverse proxy.
+
+### nginx
+
+nginx is the single entry point for all external traffic, routing requests to the appropriate services:
+- `https://localhost/` - serves the frontend client
+- `https://localhost/auth` - proxies to Keycloak for authentication
+- `https://localhost/api/v1` - proxies to the frcm-api backend
+
+SSL termination is handled at the nginx layer using self-signed certificates for local development.
+
+### Keycloak
+
+Keycloak handles authentication and authorization. It manages two realms: `master_realm` for admin access and `frcm_realm` for application users. User data is persisted in a dedicated PostgreSQL database.
+
+The realm configuration including clients, roles, and users is exported and automatically imported on startup, so no manual Keycloak setup is required.
+
+### frcm-api
+
+The core backend service exposing a REST API. It is internally organized into three services:
+- `database service` - reads and writes fire risk records to TimescaleDB
+- `frcm service` - orchestrates fire risk computation using the dynamic-frcm library
+- `frcm lib` - fetches real-time weather data from the MET API (Norwegian Meteorological Institute)
+
+### TimescaleDB
+
+Stores all computed fire risk records as time series data, optimized for time-based queries.
+
+### MQTT Publisher
+
+A Python script that fetches fire risk predictions and publishes them to an external MQTT broker. External client dashboards can subscribe to these topics via a subscriber/forwarder to receive live fire risk updates.
+
+The script can be run manually or scheduled using cron to execute at a desired interval.
+
+---
+
 ## Prerequisites
 
 - Docker Desktop installed and running on your machine
@@ -43,13 +83,11 @@ APP_HOST=0.0.0.0
 APP_PORT=6767
 REALM=frcm-realm
 CLIENT_ID=frcm-api-client
-
-# Go to the client -> Credentials and copy the client secret
-CLIENT_SECRET=""
+CLIENT_SECRET="E6rxRIkF7RwV4RXYxL80DlTgvimX5f1a"
 KEYCLOAK_PUBLIC_URL=https://${KC_SOURCE_ENDPOINT}/
 KEYCLOAK_INTERNAL_URL=http://keycloak:8080/auth/
 
-# dynamic.frcm uses https://frost.met.no/ - request credentials at:
+# dynamic-frcm uses https://frost.met.no/ - request credentials at:
 # https://frost.met.no/auth/requestCredentials.html
 MET_CLIENT_ID=
 MET_CLIENT_SECRET=
@@ -66,9 +104,9 @@ REACT_APP_KEYCLOAK_REALM=frcm-realm
 REACT_APP_KEYCLOAK_CLIENT_ID=frcm-react-app-client
 
 # mqtt env variables from hivemq
-BROKER_USERNAME=""
-BROKER_PASSWORD=""
-BROKER_HOST=""
+BROKER_USERNAME=''
+BROKER_PASSWORD=''
+BROKER_HOST=''
 BROKER_PORT=
 BROKER_TOPIC="ada502/firerisk/60.383/5.3327"
 TOPIC_QOS=1
@@ -77,10 +115,11 @@ PUBLISH_INTERVAL=30
 
 KEYCLOAK_TOKEN_URL="https://nginx/auth/realms/frcm-realm/protocol/openid-connect/token"
 MQTT_KEYCLOAK_CLIENT_ID="mqtt-client"
-# Go to the mqtt-client -> Credentials and copy the client secret
-MQTT_KEYCLOAK_CLIENT_SECRET=""
+MQTT_KEYCLOAK_CLIENT_SECRET="otSZwrTEd3ZNXZEJPQLlNqaQenhWyAxI"
 FIRERISK_API_URL="https://nginx/api/v1/frcm/range"
 ```
+
+> **Note:** `MET_CLIENT_ID` and `MET_CLIENT_SECRET` are required for fetching weather data from the Norwegian Meteorological Institute. Request credentials at [https://frost.met.no/auth/requestCredentials.html](https://frost.met.no/auth/requestCredentials.html). Fill in your MQTT broker credentials if you want to use the publisher.
 
 ### 2. Load environment variables
 
@@ -110,155 +149,13 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -subj "/CN=localhost"
 ```
 
-### 4. Comment out services in `docker-compose.yml`
-
-In `docker-compose.yml`, make sure the `nginx` depends_on section looks like this:
-
-```yaml
-depends_on:
-  keycloak:
-    condition: service_started
-  # frcm-api:
-  #   condition: service_started
-  # frontend:
-  #   condition: service_started
-```
-
-### 5. Comment out location blocks in `nginx/conf.d/localhost.conf`
-
-Make sure the api and frontend location blocks are commented out:
-
-```nginx
-location /auth/ {
-    proxy_pass              http://keycloak:8080/auth/;
-    proxy_set_header        Host                $host;
-    proxy_set_header        X-Forwarded-Proto   https;
-    proxy_set_header        X-Forwarded-For     $proxy_add_x_forwarded_for;
-    proxy_set_header        X-Forwarded-Host    $host;
-    proxy_set_header        X-Forwarded-Port    443;
-}
-
-# location /api/v1/ {
-#     proxy_pass              http://frcm-api:6767/;
-#     ...
-# }
-
-# location / {
-#     proxy_pass              http://frontend:3000;
-#     ...
-# }
-```
-
-### 6. Start Keycloak
-
-```bash
-docker compose up -d --build nginx
-```
-
-### 7. Access Keycloak
-
-Once the containers are running, open your browser and go to `https://localhost/auth/`.
-
-> **Note:** Keycloak may take a minute or two to fully start up. If the page does not load immediately, wait a moment and refresh.
-
-Since the certificate is self-signed, your browser will show a security warning. Click **Advanced** (or **Show details**) and then **Continue anyway** (or **Proceed to localhost**). Log in with the admin credentials from your `.env` file.
-
----
-
-## Keycloak Configuration
-
-### Create a realm
-
-After logging in, create a new realm named `frcm-realm`. Then go to **Realm settings -> Login** and enable the following:
-
-- User registration: **On**
-- Forgot password: **On**
-- Remember me: **On**
-
-### Create clients
-
-Go to **Clients** and create the following three clients.
-
-#### frcm-api-client
-
-Create a client with Client ID `frcm-api-client`. Enable **Client authentication** and check: Standard flow, Direct access grants, Implicit flow, Service account roles.
-
-- Valid redirect URIs: `https://localhost/api/v1/*`
-- Web origins: `https://localhost/api/v1/`
-
-#### frcm-react-app-client
-
-Create a client with Client ID `frcm-react-app-client`. Leave **Client authentication** off and check: Standard flow, Direct access grants.
-
-- Valid redirect URIs: `https://localhost/*`
-- Web origins: `https://localhost/`
-
-#### mqtt-client
-
-Create a client with Client ID `mqtt-client`. Enable **Client authentication** and check: Standard flow, Direct access grants, Implicit flow, Service account roles. No redirect URIs needed.
-
-### Create roles
-
-Go to **Realm roles** and create the following roles: `admin` and `developer`.
-
-The frcm-api checks for `admin`, `developer`, and `default-roles-frcm-realm`. The `default-roles-frcm-realm` role is assigned to all users automatically by Keycloak.
-
-### Create users
-
-Go to **Users**, create the users you need, and assign the appropriate roles to each.
-
----
-
-## Running the Full Application
-
-The frcm-api runs internally on port `6767` as set in `src/firerisk/api/__init__.py`. This can be changed via `APP_PORT` in your `.env` file.
-
-### 1. Update environment variables
-
-Update the Keycloak and MQTT variables in your `.env` file, then reload:
-
-```bash
-source ./setup_terminal_env.sh
-```
-
-### 2. Uncomment services in `docker-compose.yml`
-
-```yaml
-depends_on:
-  keycloak:
-    condition: service_started
-  frcm-api:
-    condition: service_started
-  frontend:
-    condition: service_started
-```
-
-### 3. Uncomment location blocks in `nginx/conf.d/localhost.conf`
-
-```nginx
-location /api/v1/ {
-    proxy_pass              http://frcm-api:6767/;
-    proxy_set_header        Host                $host;
-    proxy_set_header        X-Forwarded-Proto   https;
-    proxy_set_header        X-Forwarded-For     $proxy_add_x_forwarded_for;
-    proxy_set_header        X-Forwarded-Host    $host;
-    proxy_set_header        X-Forwarded-Port    443;
-}
-
-location / {
-    proxy_pass              http://frontend:3000;
-    proxy_set_header        Host                $host;
-    proxy_set_header        X-Forwarded-Proto   https;
-    proxy_set_header        X-Forwarded-For     $proxy_add_x_forwarded_for;
-}
-```
-
 ### 4. Start all services
 
 ```bash
-docker compose down
 docker compose up -d --build
 ```
+
+Keycloak will automatically import the realm configuration on first startup. This includes all clients, roles, and users, so no manual Keycloak setup is needed.
 
 ### 5. Verify the application is running
 
@@ -268,16 +165,38 @@ Once all containers are up, the following endpoints should be accessible:
 - `https://localhost/api/v1` - frcm-api
 - `https://localhost/` - Frontend
 
-### 6. Run the MQTT publisher
+> **Note:** Since the certificate is self-signed, your browser will show a security warning. Click **Advanced** and then **Continue anyway** to proceed.
+
+> **Note:** Keycloak may take a minute or two to fully start up. If the page does not load immediately, wait and refresh.
+
+To follow the Keycloak startup logs:
+
+```bash
+docker compose logs -f keycloak
+```
+
+Wait until you see `http://0.0.0.0:8080` in the logs before proceeding, then press `CTRL+C` to exit the logs.
+
+### 6. Default credentials
+
+The following user is available out of the box:
+
+| Username | Password |
+|----------|----------|
+| anne     | 1234     |
+
+Admin credentials are set via `KC_ADMIN_USERNAME` and `KC_ADMIN_PASSWORD` in your `.env` file.
+
+---
+
+## Running the MQTT Publisher
+
+The MQTT publisher fetches fire risk predictions and publishes them to your configured broker:
 
 ```bash
 docker exec firerisk-frcm-api-1 uv run python src/mqtt/frcm_publisher.py --configfile=src/mqtt/connector/config-ada502-pub.yml
 ```
 
-> **Note:** The publisher runs once per execution and then exits. For automated periodic publishing during deployment, this command can be scheduled using cron to run at the desired interval.
+> **Note:** The publisher runs once per execution and then exits. It can be scheduled using cron to run at a desired interval.
 
 ---
-
-## Demo
-
-[![Watch the demo](https://drive.google.com/thumbnail?id=1mtzZBOPRZ4B8-WT2dQaLFJuRzOLPUc23)](https://drive.google.com/file/d/1mtzZBOPRZ4B8-WT2dQaLFJuRzOLPUc23/view?usp=sharing)

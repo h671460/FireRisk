@@ -4,11 +4,11 @@ CREATE TABLE IF NOT EXISTS fire_risk (
   lat           DOUBLE PRECISION NOT NULL,
   lon           DOUBLE PRECISION NOT NULL,
   location      TEXT             NOT NULL,
-  temperature   DOUBLE PRECISION NOT NULL,
-  humidity      DOUBLE PRECISION NOT NULL,
-  wind_speed    DOUBLE PRECISION NOT NULL,
-  risk_score    DOUBLE PRECISION NOT NULL,
-  risk_level    TEXT             NOT NULL,
+  temperature   DOUBLE PRECISION,
+  humidity      DOUBLE PRECISION,
+  wind_speed    DOUBLE PRECISION,
+  risk_score    DOUBLE PRECISION,
+  risk_level    TEXT,
   created_at    TIMESTAMPTZ      NOT NULL DEFAULT now(),
   PRIMARY KEY (time, lat, lon, created_at)
 );
