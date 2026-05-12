@@ -119,10 +119,6 @@ def frcm_db_get_range(
 def frcm_db_save(db: Session, records: list[FireRisk]) -> None:
     try:
         for record in records:
-            for column in record.__table__.columns:
-                val = getattr(record, column.name)
-                if isinstance(val, float) and math.isnan(val):
-                    setattr(record, column.name, None)
             db.add(record)
         db.commit()
     except Exception as e:
