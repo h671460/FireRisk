@@ -42,9 +42,6 @@ def get_fire_risk_with_time_range(
     start_time: dt.datetime,
     end_time: dt.datetime,
 ) -> List[FireRisk]:
-    
-    start_time = start_time - dt.timedelta(days=2)
-    end_time = end_time + dt.timedelta(days=2)
 
     start_utc = to_utc(start_time)
     end_utc = to_utc(end_time)
@@ -53,53 +50,45 @@ def get_fire_risk_with_time_range(
         raise ValueError("end_time must be >= start_time")
 
     now_utc = dt.datetime.now(tz=UTC)
-    obs_delta = now_utc - start_utc
+
+    # Always fetch 2 days of observations before now to seed the model
+    obs_delta = now_utc - (now_utc - dt.timedelta(days=2))
+    obs_delta = dt.timedelta(days=2)
 
     wd: WeatherData = frcmAPI.get_weatherdata_now(location, obs_delta)
 
-    # Filter weather points
+    # Collect ALL observations (don't filter by start_time - needed to seed FRCM)
     weather_points: Dict[dt.datetime, Dict] = {}
 
     for p in wd.observations.data:
         ts = to_utc(p.timestamp)
-        if start_utc <= ts <= end_utc:
-            weather_points[ts] = p
+        weather_points[ts] = p  # keep all observations for model seeding
 
     for p in wd.forecast.data:
         ts = to_utc(p.timestamp)
-        if start_utc <= ts <= end_utc and ts not in weather_points:
+        if ts not in weather_points:
             weather_points[ts] = p
 
-    # Compute predictions
-    wd_in_range = wd.model_copy(update={
-        "observations": wd.observations.model_copy(
-            update={"data": [p for p in wd.observations.data if start_utc <= to_utc(p.timestamp) <= end_utc]}
-        ),
-        "forecast": wd.forecast.model_copy(
-            update={"data": [p for p in wd.forecast.data if start_utc <= to_utc(p.timestamp) <= end_utc]}
-        ),
-    })
-
-    pred: FireRiskPrediction = frcmAPI.compute(wd_in_range)
+    # Compute predictions on the FULL weather data (observations + forecast)
+    pred: FireRisk = frcmAPI.compute(wd)  # <-- use full wd, not filtered
     pred_map = _prediction_map(pred)
 
     results: List[FireRisk] = []
-
     loc_str = f"{location.latitude},{location.longitude}"
-    
     created_at = utc_now()
 
     for ts in sorted(weather_points.keys()):
+        # Only RETURN records within the requested range
+        if not (start_utc <= ts <= end_utc):
+            continue
+
         w = weather_points[ts]
         pred_obj = pred_map.get(ts)
 
-        # Skip rows without prediction (optional — remove if you want them)
         if not pred_obj:
             continue
 
         score = float(pred_obj.ttf)
-        
-        
 
         results.append(
             FireRisk(
@@ -115,7 +104,7 @@ def get_fire_risk_with_time_range(
                 created_at=created_at,
             )
         )
-        
+
     return results
 
 if __name__ == "__main__":

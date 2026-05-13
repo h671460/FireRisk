@@ -63,7 +63,7 @@ def frcm_db_check_range(
         if db_min is None or db_max is None:
             return False
 
-        return db_max >= start_time and db_min <= end_time
+        return db_min <= start_time and db_max >= end_time
         
 
     except Exception as e:
