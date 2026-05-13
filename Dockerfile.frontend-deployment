@@ -7,8 +7,8 @@ RUN npm install
 
 COPY frontend_keycloak/ .
 
-ARG REACT_APP_API=https://localhost/api/v1
-ARG REACT_APP_KEYCLOAK_URL=https://localhost/auth
+ARG REACT_APP_API=https://fireriskgroup02.com/api/v1
+ARG REACT_APP_KEYCLOAK_URL=https://fireriskgroup02.com/auth
 ARG REACT_APP_KEYCLOAK_REALM=frcm-realm
 ARG REACT_APP_KEYCLOAK_CLIENT_ID=frcm-react-app-client
 

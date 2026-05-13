@@ -11,7 +11,6 @@ const initOptions = {
 };
 
 
-
 console.log("Keycloak Init Options:", initOptions); // Debugging line to check the config values
 
 const keycloakConfig = new Keycloak(initOptions);
