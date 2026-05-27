@@ -51,7 +51,7 @@ services:
 
 
   timescaledb:
-    image: timescale/timescaledb:latest-pg16 
+    image: timescale/timescaledb:latest-pg17 
     environment:
       - POSTGRES_USER=${TIMESCALE_USER}
       - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD}
@@ -107,7 +107,7 @@ services:
       - .env
 
   nginx:
-    image: nginx:1.19.0-alpine
+    image: nginx:alpine
     ports:
       - "${NGINX_HTTP_PORT}:80"
       - "${NGINX_HTTPS_PORT}:443"
